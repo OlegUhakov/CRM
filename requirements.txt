@@ -1,12 +1,12 @@
-asgiref==3.11.1
+asgiref==3.12.1
 beautifulsoup4==4.15.0
 bleach==6.4.0
 cffi==2.0.0
 cryptography==49.0.0
-Django==6.0.7
+Django==6.0.8
 pillow==12.2.0
 pycparser==3.0
 sqlparse==0.5.5
-tzdata==2026.2
+tzdata==2026.3
 python-slugify==8.0.4
 webencodings==0.5.1

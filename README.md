@@ -40,7 +40,7 @@ Articles can be saved directly from the internet via a link, making it easy to b
 
 ---
 
-**Django 6.0.7 + Tailwind CSS 4 + Alpine.js + HTMX + AI Assistant**
+**Django 6.0.8 + Tailwind CSS 4 + Alpine.js + HTMX + AI Assistant**
 
 A project management, contractor and task tracking system for engineering and manufacturing businesses. Features 14 custom apps, an AI assistant with command mode, and a modular HTMX-driven UI.
 
@@ -67,7 +67,7 @@ Or run `install.bat` for one-click setup. Default credentials: `admin` / `admin`
 
 | Layer | Technology |
 |-------|-----------|
-| Backend | Django 6.0.7, Python 3.14+, SQLite |
+| Backend | Django 6.0.8, Python 3.14+, SQLite |
 | Frontend | Tailwind CSS 4 (CLI + CDN), Alpine.js 3.x, HTMX 2.0.4, Lucide Icons, Montserrat |
 | AI | Ollama, Anthropic, OpenAI, Google, Mistral, Groq, DeepSeek, OpenRouter, OpenCode |
 | Build | Tailwind CLI v4 (`npm run dev` / `npm run build`) |
