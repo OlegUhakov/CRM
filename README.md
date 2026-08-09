@@ -2,7 +2,27 @@
 
 > **Django 6.1 + Tailwind CSS 4 + Alpine.js + HTMX + AI Assistant**
 
-A lightweight CRM/ERP platform for engineering and manufacturing teams. It brings projects, tasks, materials, technical drawings, documents, and internal knowledge into one unified workspace — ideal for small manufacturing shops, CNC workshops, engineering bureaus, and teams that need structure without heavy corporate systems.
+A lightweight CRM/ERP platform designed for engineering and manufacturing teams.
+It brings projects, tasks, materials, technical drawings, documents, and internal knowledge together in one unified workspace. Ideal for small manufacturing shops, CNC workshops, engineering bureaus, and teams that need structure without heavy corporate systems.
+
+Key Features:
+
+Project and task management
+
+Material and BOM tracking
+
+Support for engineering files (DXF, STEP, STL)
+
+Centralized document storage
+
+Built‑in knowledge library
+
+AI assistant for automation and team support
+
+Fast HTMX‑based interface without a heavy frontend
+
+Purpose:
+To give small industrial companies a simple, fast, and local ERP‑level tool that can be deployed without complex infrastructure.
 
 ---
 
