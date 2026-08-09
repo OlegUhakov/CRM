@@ -3,7 +3,7 @@ beautifulsoup4==4.15.0
 bleach==6.4.0
 cffi==2.0.0
 cryptography==49.0.0
-Django==6.0.8
+Django==6.1
 pillow==12.2.0
 pycparser==3.0
 sqlparse==0.5.5
