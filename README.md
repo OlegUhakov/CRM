@@ -1,12 +1,29 @@
 ![CRM](CRM.png)
 
-# CRM Project Description
+## Product Description 
 
-## Overview
+A lightweight CRM/ERP platform designed for engineering and manufacturing teams.  
+It brings projects, tasks, materials, technical drawings, documents, and internal knowledge together in one unified workspace.
+Ideal for small manufacturing shops, CNC workshops, engineering bureaus, and teams that need structure without heavy corporate systems.
 
-This CRM is built for small and medium-sized businesses that need a reliable, organized way to manage project documentation and reference materials. Rather than scattering files across emails, cloud drives, and local folders, the system gives every project — and every piece of reference material — a single, structured home.
+Key Features:
 
-The CRM is built around two core goals.
+Project and task management
+
+Material and BOM tracking
+
+Support for engineering files (DXF, STEP, STL)
+
+Centralized document storage
+
+Built‑in knowledge library
+
+AI assistant for automation and team support
+
+Fast HTMX‑based interface without a heavy frontend
+
+Purpose:  
+To give small industrial companies a simple, fast, and local ERP‑level tool that can be deployed without complex infrastructure.
 
 ## Goal 1: Centralized Project Documentation
 
