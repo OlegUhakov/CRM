@@ -1,31 +1,14 @@
 ![CRM](CRM.png)
 
-## Product Description 
+> **Django 6.1 + Tailwind CSS 4 + Alpine.js + HTMX + AI Assistant**
 
-A lightweight CRM/ERP platform designed for engineering and manufacturing teams.  
-It brings projects, tasks, materials, technical drawings, documents, and internal knowledge together in one unified workspace.
-Ideal for small manufacturing shops, CNC workshops, engineering bureaus, and teams that need structure without heavy corporate systems.
+A lightweight CRM/ERP platform for engineering and manufacturing teams. It brings projects, tasks, materials, technical drawings, documents, and internal knowledge into one unified workspace — ideal for small manufacturing shops, CNC workshops, engineering bureaus, and teams that need structure without heavy corporate systems.
 
-Key Features:
+---
 
-Project and task management
+## Product Description
 
-Material and BOM tracking
-
-Support for engineering files (DXF, STEP, STL)
-
-Centralized document storage
-
-Built‑in knowledge library
-
-AI assistant for automation and team support
-
-Fast HTMX‑based interface without a heavy frontend
-
-Purpose:  
-To give small industrial companies a simple, fast, and local ERP‑level tool that can be deployed without complex infrastructure.
-
-## Goal 1: Centralized Project Documentation
+### Goal 1: Centralized Project Documentation
 
 Every project gets its own dedicated space. As soon as a project is created, you can start adding everything related to it:
 
@@ -38,7 +21,7 @@ Once the project is saved to a chosen location, the system automatically generat
 
 When a project is finished, it can be archived and moved out of the active workspace, keeping the working area clean while preserving a complete, organized record for future reference.
 
-## Goal 2: A Central Library for Reference Materials
+### Goal 2: A Central Library for Reference Materials
 
 Beyond individual projects, the CRM also serves as a knowledge base for general documentation the business collects over time:
 
@@ -48,18 +31,14 @@ Beyond individual projects, the CRM also serves as a knowledge base for general 
 
 Articles can be saved directly from the internet via a link, making it easy to build a personal reference library without manual copy-pasting. As with projects, all saved materials are automatically organized into clearly structured folders.
 
-## Key Benefits
+### Key Benefits
 
 - **One place for everything** — no more hunting across folders, drives, and inboxes
 - **Automatic organization** — numbered project folders and categorized subfolders are created without manual effort
 - **Clean lifecycle management** — active projects stay easy to find; finished projects can be archived without losing structure
 - **Built-in knowledge base** — a growing library of reference material, saved and organized alongside project work
 
----
-
-**Django 6.0.8 + Tailwind CSS 4 + Alpine.js + HTMX + AI Assistant**
-
-A project management, contractor and task tracking system for engineering and manufacturing businesses. Features 14 custom apps, an AI assistant with command mode, and a modular HTMX-driven UI.
+A project management, contractor and task tracking system featuring 14 custom apps, an AI assistant with a command mode, and a modular HTMX-driven UI.
 
 ---
 
@@ -72,11 +51,15 @@ pip install -r requirements.txt
 npm install
 npm run build
 python manage.py migrate
+python manage.py seed_ai_providers   # seed AI provider list
+python manage.py collectstatic
 python manage.py createsuperuser
 python manage.py runserver
 ```
 
-Or run `install.bat` for one-click setup. Default credentials: `admin` / `admin`.
+Or run `install.bat` for one-click setup (creates venv, installs Python + Node dependencies, builds Tailwind, runs migrations, seeds AI providers, collects static files, and creates a superuser). Default credentials: `admin` / `admin`.
+
+Run `update.bat` after pulling new code to refresh dependencies and rebuild the frontend. Start the server anytime with `runserver.bat`.
 
 ---
 
@@ -84,7 +67,7 @@ Or run `install.bat` for one-click setup. Default credentials: `admin` / `admin`
 
 | Layer | Technology |
 |-------|-----------|
-| Backend | Django 6.0.8, Python 3.14+, SQLite |
+| Backend | Django 6.1, Python 3.14+, SQLite |
 | Frontend | Tailwind CSS 4 (CLI + CDN), Alpine.js 3.x, HTMX 2.0.4, Lucide Icons, Montserrat |
 | AI | Ollama, Anthropic, OpenAI, Google, Mistral, Groq, DeepSeek, OpenRouter, OpenCode |
 | Build | Tailwind CLI v4 (`npm run dev` / `npm run build`) |
