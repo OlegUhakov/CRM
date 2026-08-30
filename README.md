@@ -315,3 +315,30 @@ Articles are auto-saved as Markdown (`.md`) files on disk for portability:
 ## License
 
 License: MIT
+
+---
+
+## Screenshots
+
+<p>
+  <a href="screenshots/Home1.png"><img src="screenshots/Home1.png" width="220" alt="Home 1" /></a>
+  <a href="screenshots/Home2.png"><img src="screenshots/Home2.png" width="220" alt="Home 2" /></a>
+  <a href="screenshots/Projects.png"><img src="screenshots/Projects.png" width="220" alt="Projects" /></a>
+  <a href="screenshots/Materials.png"><img src="screenshots/Materials.png" width="220" alt="Materials" /></a>
+  <a href="screenshots/Drawings.png"><img src="screenshots/Drawings.png" width="220" alt="Drawings" /></a>
+  <a href="screenshots/Tasks.png"><img src="screenshots/Tasks.png" width="220" alt="Tasks" /></a>
+  <a href="screenshots/Documents.png"><img src="screenshots/Documents.png" width="220" alt="Documents" /></a>
+  <a href="screenshots/Companies.png"><img src="screenshots/Companies.png" width="220" alt="Companies" /></a>
+  <a href="screenshots/Contacts.png"><img src="screenshots/Contacts.png" width="220" alt="Contacts" /></a>
+  <a href="screenshots/Contact.png"><img src="screenshots/Contact.png" width="220" alt="Contact" /></a>
+  <a href="screenshots/Notes.png"><img src="screenshots/Notes.png" width="220" alt="Notes" /></a>
+  <a href="screenshots/Note.png"><img src="screenshots/Note.png" width="220" alt="Note" /></a>
+  <a href="screenshots/Library.png"><img src="screenshots/Library.png" width="220" alt="Library" /></a>
+  <a href="screenshots/New%20document.png"><img src="screenshots/New%20document.png" width="220" alt="New document" /></a>
+  <a href="screenshots/Categories.png"><img src="screenshots/Categories.png" width="220" alt="Categories" /></a>
+  <a href="screenshots/Photo%20gallery.png"><img src="screenshots/Photo%20gallery.png" width="220" alt="Photo gallery" /></a>
+  <a href="screenshots/Files%20catalog.png"><img src="screenshots/Files%20catalog.png" width="220" alt="Files catalog" /></a>
+  <a href="screenshots/Settings.png"><img src="screenshots/Settings.png" width="220" alt="Settings" /></a>
+  <a href="screenshots/Settings%20Ai.png"><img src="screenshots/Settings%20Ai.png" width="220" alt="Settings AI" /></a>
+  <a href="screenshots/Chat.png"><img src="screenshots/Chat.png" width="220" alt="Chat" /></a>
+</p>
