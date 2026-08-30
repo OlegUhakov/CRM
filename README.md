@@ -77,7 +77,7 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
-Or run `install.bat` for one-click setup (creates venv, installs Python + Node dependencies, builds Tailwind, runs migrations, seeds AI providers, collects static files, and creates a superuser). Default credentials: `admin` / `admin`.
+Or run [install.bat](https://github.com/OlegUshakov-pl/CRM/blob/main/install.bat) for one-click setup (creates venv, installs Python + Node dependencies, builds Tailwind, runs migrations, seeds AI providers, collects static files, and creates a superuser). Default credentials: `admin` / `admin`.
 
 Run `update.bat` after pulling new code to refresh dependencies and rebuild the frontend. Start the server anytime with `runserver.bat`.
 
