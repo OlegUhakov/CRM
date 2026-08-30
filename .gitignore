@@ -41,7 +41,7 @@ Thumbs.db
 *.jpg
 *.jpeg
 *.jfif
-# *.png
+* .png
 *.webp
 
 VERSION
