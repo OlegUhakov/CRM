@@ -320,9 +320,16 @@ License: MIT
 
 ## Movies tutorial
 
+### CRM Install
 [![CRM Install](https://img.youtube.com/vi/6uPxHwF2sys/maxresdefault.jpg)](https://youtu.be/6uPxHwF2sys)
+
+### Creating of a project in CRM
 [![Creating of a project in CRM](https://img.youtube.com/vi/Z5n2gr-W1yo/maxresdefault.jpg)](https://youtu.be/Z5n2gr-W1yo)
+
+### A library of books
 [![A library of books](https://img.youtube.com/vi/P3DGkeb9Oh8/maxresdefault.jpg)](https://youtu.be/P3DGkeb9Oh8)
+
+### Import and Export of the Project
 [![Import and Export of the Project](https://img.youtube.com/vi/wBJ8hBmErec/maxresdefault.jpg)](https://youtu.be/wBJ8hBmErec)
 
 
