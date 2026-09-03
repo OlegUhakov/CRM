@@ -321,7 +321,9 @@ License: MIT
 ## Movies tutorial
 
 [![CRM Install](https://img.youtube.com/vi/6uPxHwF2sys/maxresdefault.jpg)](https://youtu.be/6uPxHwF2sys)
-
+[![Creating of a project in CRM](https://img.youtube.com/vi/6uPxHwF2sys/maxresdefault.jpg)](https://youtu.be/Z5n2gr-W1yo?si=hPtO-zEpZyuF81kb)
+[![CRM Install](https://img.youtube.com/vi/6uPxHwF2sys/maxresdefault.jpg)](https://youtu.be/6uPxHwF2sys)
+[![CRM Install](https://img.youtube.com/vi/6uPxHwF2sys/maxresdefault.jpg)](https://youtu.be/6uPxHwF2sys)
 
 
 ## Screenshots
