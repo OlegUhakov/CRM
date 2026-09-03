@@ -320,9 +320,8 @@ License: MIT
 
 ## Movies tutorial
 
-### CRM Install
+[![CRM Install](https://img.youtube.com/vi/6uPxHwF2sys/maxresdefault.jpg)](https://youtu.be/6uPxHwF2sys)
 
-[![Watch movie](https://youtu.be/6uPxHwF2sys?si=0WDjPSTIm_MPFANA)
 
 
 ## Screenshots
