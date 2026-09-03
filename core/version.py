@@ -10,6 +10,6 @@ def read_version():
             ['git', 'rev-list', '--count', 'HEAD'],
             capture_output=True, text=True, cwd=BASE_DIR
         ).stdout.strip()
-        return f'1.2.{count}'
+        return f'0.7.{count}'
     except Exception:
-        return '1.2.0'
+        return '0.7.0'

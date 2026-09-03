@@ -256,7 +256,7 @@ All business models extend `TimeStampedModel` (`created_at`, `updated_at`, `crea
 - **Collapsible sidebar** — expandable/collapsible navigation
 - **Settings panel** — configurable storage paths, naming, AI providers
 - **AI undo** — 10-second undo window for write operations
-- **Versioning** — `1.2.{git_commit_count}` via `core/version.py`
+- **Versioning** — `0.7.{git_commit_count}` via `core/version.py`
 - **Security** — path traversal, SSRF, and open redirect protection
 
 ---
