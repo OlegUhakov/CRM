@@ -321,7 +321,9 @@ License: MIT
 ## Movies tutorial
 
 ### CRM Install
-<iframe width="560" height="315" src="https://youtu.be/6uPxHwF2sys?si=0WDjPSTIm_MPFANA" frameborder="0" allowfullscreen></iframe>
+
+[![Watch movie](https://youtu.be/6uPxHwF2sys?si=0WDjPSTIm_MPFANA)
+
 
 ## Screenshots
 
