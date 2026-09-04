@@ -97,7 +97,10 @@ def search_view(request):
 
 @login_required
 def settings_page(request):
-    return render(request, 'core/settings.html')
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    users = User.objects.all().order_by('username')
+    return render(request, 'core/settings.html', {'users': users})
 
 
 @login_required

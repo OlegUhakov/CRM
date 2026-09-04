@@ -164,11 +164,46 @@
 
     <!-- Users Tab -->
     <div x-show="tab === 'users'" x-cloak>
-        <div class="max-w-2xl">
-            <div class="text-center py-12 text-gray-400 dark:text-gray-500">
-                <i data-lucide="users" class="w-12 h-12 mx-auto mb-3 opacity-50"></i>
-                <p class="text-[14px]">User management coming soon.</p>
+        <div class="max-w-3xl">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">Users ({{ users|length }})</h3>
             </div>
+            <div class="border border-[#e8e8e8] dark:border-[#222] rounded-lg overflow-hidden">
+                <table class="w-full text-[13px]">
+                    <thead class="bg-gray-50 dark:bg-[#111] text-gray-500 dark:text-gray-400 text-[11px] uppercase tracking-wider">
+                        <tr>
+                            <th class="text-left px-4 py-2.5 font-medium">Username</th>
+                            <th class="text-left px-4 py-2.5 font-medium">Email</th>
+                            <th class="text-left px-4 py-2.5 font-medium">Role</th>
+                            <th class="text-left px-4 py-2.5 font-medium">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-[#e8e8e8] dark:divide-[#222] bg-white dark:bg-black">
+                        {% for u in users %}
+                        <tr class="hover:bg-gray-50 dark:hover:bg-[#111] transition-colors">
+                            <td class="px-4 py-3 font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                                <span class="w-7 h-7 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 flex items-center justify-center text-[11px] font-bold">{{ u.username|slice:":1"|upper }}</span>
+                                {{ u.username }}
+                                {% if u.id == request.user.id %}<span class="text-[11px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-[#1a1a1a] text-gray-500">you</span>{% endif %}
+                            </td>
+                            <td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ u.email|default:"—" }}</td>
+                            <td class="px-4 py-3">
+                                {% if u.is_superuser %}<span class="text-[11px] px-2 py-0.5 rounded bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">Admin</span>
+                                {% elif u.is_staff %}<span class="text-[11px] px-2 py-0.5 rounded bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">Staff</span>
+                                {% else %}<span class="text-[11px] px-2 py-0.5 rounded bg-gray-100 text-gray-600 dark:bg-[#1a1a1a] dark:text-gray-400">User</span>{% endif %}
+                            </td>
+                            <td class="px-4 py-3">
+                                {% if u.is_active %}<span class="w-2 h-2 inline-block rounded-full bg-green-500 mr-1"></span><span class="text-gray-600 dark:text-gray-400">Active</span>
+                                {% else %}<span class="w-2 h-2 inline-block rounded-full bg-gray-300 dark:bg-gray-600 mr-1"></span><span class="text-gray-400">Inactive</span>{% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" class="px-4 py-8 text-center text-gray-400 dark:text-gray-500">No users found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <p class="text-xs text-gray-400 dark:text-gray-500 mt-3">Управление пользователями через <a href="/admin/auth/user/" class="text-violet-500 hover:text-violet-600 underline">Django Admin</a>.</p>
         </div>
     </div>
 
