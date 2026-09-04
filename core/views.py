@@ -529,3 +529,96 @@ def api_general_settings(request):
         return JsonResponse({'ok': True})
 
     return JsonResponse({'ok': False, 'error': 'Method not allowed.'}, status=405)
+
+
+@login_required
+@require_GET
+def api_users(request):
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    users = User.objects.all().order_by('username').values('id', 'username', 'email', 'is_superuser', 'is_staff', 'is_active')
+    return JsonResponse({'ok': True, 'users': list(users)})
+
+
+@login_required
+@require_http_methods(["PUT", "PATCH"])
+def api_user_update(request, user_id):
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    try:
+        body = json.loads(request.body.decode('utf-8') or '{}')
+    except json.JSONDecodeError:
+        return JsonResponse({'ok': False, 'error': 'Invalid JSON.'}, status=400)
+
+    try:
+        target = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return JsonResponse({'ok': False, 'error': 'User not found.'}, status=404)
+
+    # Only superuser or self can edit; non-superusers cannot change roles
+    if not request.user.is_superuser and request.user.id != target.id:
+        return JsonResponse({'ok': False, 'error': 'Permission denied.'}, status=403)
+
+    username = (body.get('username') or '').strip()
+    email = (body.get('email') or '').strip()
+    role = (body.get('role') or '').strip()  # admin / staff / user
+    is_active = body.get('is_active')
+
+    if username:
+        if User.objects.exclude(id=target.id).filter(username=username).exists():
+            return JsonResponse({'ok': False, 'error': 'Username already taken.'}, status=400)
+        target.username = username
+    if email is not None:
+        target.email = email
+
+    if role:
+        if not request.user.is_superuser:
+            return JsonResponse({'ok': False, 'error': 'Only admins can change roles.'}, status=403)
+        if role == 'admin':
+            target.is_superuser = True
+            target.is_staff = True
+        elif role == 'staff':
+            target.is_superuser = False
+            target.is_staff = True
+        elif role == 'user':
+            # Prevent removing last superuser
+            if target.is_superuser and User.objects.filter(is_superuser=True).count() <= 1:
+                return JsonResponse({'ok': False, 'error': 'Cannot demote last superuser.'}, status=400)
+            target.is_superuser = False
+            target.is_staff = False
+        else:
+            return JsonResponse({'ok': False, 'error': 'Invalid role.'}, status=400)
+
+    if is_active is not None:
+        if not request.user.is_superuser:
+            return JsonResponse({'ok': False, 'error': 'Only admins can change status.'}, status=403)
+        if not is_active and target.id == request.user.id:
+            return JsonResponse({'ok': False, 'error': 'Cannot deactivate yourself.'}, status=400)
+        target.is_active = bool(is_active)
+
+    target.save()
+    return JsonResponse({'ok': True, 'user': {
+        'id': target.id, 'username': target.username, 'email': target.email,
+        'is_superuser': target.is_superuser, 'is_staff': target.is_staff, 'is_active': target.is_active,
+    }})
+
+
+@login_required
+@require_http_methods(["DELETE"])
+def api_user_delete(request, user_id):
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    try:
+        target = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return JsonResponse({'ok': False, 'error': 'User not found.'}, status=404)
+
+    if not request.user.is_superuser:
+        return JsonResponse({'ok': False, 'error': 'Only admins can delete users.'}, status=403)
+    if target.id == request.user.id:
+        return JsonResponse({'ok': False, 'error': 'Cannot delete yourself.'}, status=400)
+    if target.is_superuser and User.objects.filter(is_superuser=True).count() <= 1:
+        return JsonResponse({'ok': False, 'error': 'Cannot delete last superuser.'}, status=400)
+
+    target.delete()
+    return JsonResponse({'ok': True})

@@ -19,5 +19,8 @@ urlpatterns = [
     path('api/settings/ai/providers/<str:provider_id>/models/<str:model_id>', views.api_provider_model_delete, name='api_provider_model_delete'),
     path('api/settings/ai/active-provider', views.api_active_provider, name='api_active_provider'),
     path('api/settings/general', views.api_general_settings, name='api_general_settings'),
+    path('api/settings/users', views.api_users, name='api_users'),
+    path('api/settings/users/<int:user_id>', views.api_user_update, name='api_user_update'),
+    path('api/settings/users/<int:user_id>/delete', views.api_user_delete, name='api_user_delete'),
     path('project-files/<path:file_path>', views.serve_project_file, name='serve_project_file'),
 ]
