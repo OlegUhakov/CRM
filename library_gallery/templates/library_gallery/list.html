@@ -91,6 +91,11 @@ function submitGalleryFilters() {
 function handleGalleryUpload(files) {
     if (!files || files.length === 0) return;
     var done = 0;
+    var total = files.length;
+    var refreshGallery = function() {
+        document.getElementById('gallery-upload-input').value = '';
+        htmx.ajax('GET', '{% url "library_gallery:list" %}?' + buildGalleryParams().toString(), {target: '#gallery-container', swap: 'innerHTML'});
+    };
     for (var i = 0; i < files.length; i++) {
         var fd = new FormData();
         fd.append('file', files[i]);
@@ -99,13 +104,12 @@ function handleGalleryUpload(files) {
             headers: {'X-CSRFToken': getGalleryCSRF()}
         }).then(function(r) { return r.json(); }).then(function() {
             done++;
-            if (done === files.length) window.location.reload();
+            if (done === total) refreshGallery();
         }).catch(function() {
             done++;
-            if (done === files.length) window.location.reload();
+            if (done === total) refreshGallery();
         });
     }
-    document.getElementById('gallery-upload-input').value = '';
 }
 
 function getGalleryCSRF() {
