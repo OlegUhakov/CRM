@@ -277,11 +277,19 @@
             var sidebar = document.getElementById("sidebar");
             var icon = document.getElementById("toggle-icon");
             var saved = localStorage.getItem('sidebar_collapsed');
+            // Suppress animation for the initial state restore,
+            // so switching tabs doesn't replay the expand animation.
+            sidebar.style.transition = 'none';
             if (saved === 'false') {
                 sidebar.classList.remove("collapsed");
                 icon.setAttribute("data-lucide", "panel-left-close");
                 lucide.createIcons();
             }
+            requestAnimationFrame(function() {
+                requestAnimationFrame(function() {
+                    sidebar.style.transition = '';
+                });
+            });
         })();
 
         function toggleSidebar() {
