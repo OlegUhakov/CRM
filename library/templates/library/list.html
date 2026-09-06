@@ -46,13 +46,13 @@
     <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-4">
         <div class="flex flex-wrap items-center gap-3">
             <div class="flex border border-gray-300 dark:border-gray-600 rounded-none overflow-hidden">
-                <button onclick="filterByContentType('article')" class="px-4 py-2 text-sm font-medium {% if current_content_type == 'article' %}bg-blue-400 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400{% else %}bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700{% endif %} transition-colors">
+                <button onclick="filterByContentType('article')" class="px-4 py-2 text-sm font-medium {% if current_content_type == 'article' %}bg-blue-400 text-white dark:bg-blue-900/30 dark:text-blue-400{% else %}bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700{% endif %} transition-colors">
                     <i data-lucide="file-text" class="w-4 h-4 inline mr-1"></i>Articles
                 </button>
-                <button onclick="filterByContentType('file')" class="px-4 py-2 text-sm font-medium {% if current_content_type == 'file' %}bg-blue-200 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400{% else %}bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700{% endif %} transition-colors">
+                <button onclick="filterByContentType('file')" class="px-4 py-2 text-sm font-medium {% if current_content_type == 'file' %}bg-blue-200 text-white dark:bg-blue-900/30 dark:text-blue-400{% else %}bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700{% endif %} transition-colors">
                     <i data-lucide="file" class="w-4 h-4 inline mr-1"></i>Files
                 </button>
-                <button onclick="filterByContentType('all')" class="px-4 py-2 text-sm font-medium {% if current_content_type == 'all' %}bg-blue-200-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400{% else %}bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700{% endif %} transition-colors">
+                <button onclick="filterByContentType('all')" class="px-4 py-2 text-sm font-medium {% if current_content_type == 'all' %}bg-blue-200-100 text-white dark:bg-blue-900/30 dark:text-blue-400{% else %}bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700{% endif %} transition-colors">
                     <i data-lucide="layers" class="w-4 h-4 inline mr-1"></i>All
                 </button>
             </div>
@@ -200,10 +200,10 @@ function filterByContentType(type) {
     buttons.forEach(function(btn) {
         var btnType = btn.getAttribute('onclick').match(/filterByContentType\('(\w+)'\)/)[1];
         if (btnType === type) {
-            btn.classList.add('bg-blue-400', 'text-blue-700', 'dark:bg-blue-900/100', 'dark:text-white');
+            btn.classList.add('bg-blue-400', 'text-white', 'dark:bg-blue-900/100', 'dark:text-white');
             btn.classList.remove('bg-white', 'dark:bg-gray-800', 'text-gray-600', 'dark:text-gray-400');
         } else {
-            btn.classList.remove('bg-blue-400', 'text-blue-700', 'dark:bg-blue-900/100', 'dark:text-wite');
+            btn.classList.remove('bg-blue-400', 'text-white', 'dark:bg-blue-900/100', 'dark:text-wite');
             btn.classList.add('bg-white', 'dark:bg-gray-800', 'text-gray-600', 'dark:text-gray-400');
         }
     });
