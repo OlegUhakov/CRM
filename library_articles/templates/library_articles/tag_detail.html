@@ -75,10 +75,10 @@
                 <a href="{% url 'library_articles:detail' item.slug %}" class="block p-4">
                     <div class="flex items-start justify-between mb-3">
                         <div class="w-full h-32 bg-gray-100 dark:bg-gray-700 rounded overflow-hidden mb-3">
-                            {% if item.preview_image %}
-                                <img src="{{ item.preview_image.url }}" alt="{{ item.title }}" class="w-full h-full object-cover">
-                            {% elif item.file_type == 'image' and item.file %}
+                            {% if item.file_type == 'image' and item.file %}
                                 <img src="{{ item.file.url }}" alt="{{ item.title }}" class="w-full h-full object-cover">
+                            {% elif item.preview_image %}
+                                <img src="{{ item.preview_image.url }}" alt="{{ item.title }}" class="w-full h-full object-cover">
                             {% elif item.file_type == 'pdf' %}
                                 <div class="w-full h-full flex items-center justify-center">
                                     <i data-lucide="file-text" class="w-12 h-12 text-red-400"></i>
