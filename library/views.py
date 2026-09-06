@@ -306,14 +306,24 @@ def library_create(request):
 @login_required
 def library_edit(request, slug):
     item = get_object_or_404(LibraryItem, slug=slug, is_active=True)
+    old_file_name = item.file.name if item.file else None
     if request.method == 'POST':
         form = LibraryItemForm(request.POST, request.FILES, instance=item)
         if form.is_valid():
             item = form.save(commit=False)
             if item.content:
                 item.content = bleach.clean(item.content, tags=['p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'a', 'img', 'blockquote', 'pre', 'code', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'span', 'div'], attributes={'a': ['href', 'target'], 'img': ['src', 'alt', 'width', 'height'], 'span': ['style'], 'div': ['style']}, strip=True)
+            if request.POST.get('remove_picture') and 'file' not in request.FILES:
+                if item.file:
+                    item.file.delete(save=False)
+                    item.file = None
             item.save()
             form._save_tags(item)
+            if old_file_name and item.file and item.file.name != old_file_name:
+                try:
+                    item.file.storage.delete(old_file_name)
+                except Exception:
+                    pass
             if item.content or item.file:
                 item.save_as_md(item.content or '')
             log_activity(request.user, 'updated', f'Library item "{item.title}"', item)
