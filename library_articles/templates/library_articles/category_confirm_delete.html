@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}Delete {{ category.name }} - Library{% endblock %}
+{% block breadcrumb %}Library / Categories / Delete{% endblock %}
+{% block content %}
+<div class="max-w-lg mx-auto mt-10">
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-6 text-center">
+        <i data-lucide="alert-triangle" class="w-12 h-12 text-red-500 mx-auto mb-4"></i>
+        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Delete Category</h2>
+        <p class="text-gray-500 dark:text-gray-400 mb-2">Delete <strong class="text-gray-700 dark:text-gray-300">{{ category.name }}</strong>?</p>
+        <p class="text-sm text-gray-400 mb-6">Documents in this category will not be deleted.</p>
+        <form method="post">
+            {% csrf_token %}
+            <div class="flex justify-center gap-3">
+                <a href="{% url 'library_articles:category_list' %}" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-[#1a1a1a] hover:bg-gray-200 dark:hover:bg-[#222] transition-colors rounded-[20px]">Cancel</a>
+                <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 transition-colors rounded-[20px]">Delete</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

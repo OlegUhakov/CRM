@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}{{ item.title }} - Files{% endblock %}
+{% block breadcrumb %}Files / {{ item.title }}{% endblock %}
+{% block content %}
+<div class="mx-auto space-y-6">
+    <a href="{% url 'library_files:list' %}" class="text-sm text-violet-600 hover:underline">&larr; Back to Files</a>
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-6">
+        <h1 class="text-xl font-bold text-gray-900 dark:text-white">{{ item.title }}</h1>
+        {% if item.description %}<p class="text-gray-500 mt-1">{{ item.description }}</p>{% endif %}
+        <div class="flex items-center gap-3 mt-3 text-sm text-gray-500">
+            {% if item.file_type %}<span class="uppercase text-xs font-medium text-gray-400">{{ item.file_type }}</span>{% endif %}
+            {% if item.category %}<span>{{ item.category.name }}</span>{% endif %}
+            <span>{{ item.created_at|date:'M d, Y' }}</span>
+        </div>
+        {% if item.file %}
+        <div class="mt-4 flex gap-3">
+            <a href="{{ item.file.url }}" download class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-medium rounded-[20px] transition-colors">
+                <i data-lucide="download" class="w-4 h-4"></i> Download
+            </a>
+            <a href="{% url 'library_articles:detail' item.slug %}" class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-sm rounded-[20px] transition-colors">Open as Document</a>
+        </div>
+        <p class="text-xs text-gray-400 mt-2 truncate">{{ item.file.name }}</p>
+        {% endif %}
+    </div>
+    {% if item.file and item.file_type == 'pdf' %}
+    <div class="border border-gray-200 rounded overflow-hidden" style="height: 80vh;">
+        <iframe src="{{ item.file.url }}" class="w-full h-full" frameborder="0"></iframe>
+    </div>
+    {% endif %}
+    {% if item.file and item.file_type == 'image' %}
+    <div class="flex justify-center bg-white dark:bg-gray-800 border border-gray-200 p-6">
+        <img src="{{ item.file.url }}" alt="{{ item.title }}" class="max-w-full max-h-[70vh] object-contain rounded">
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

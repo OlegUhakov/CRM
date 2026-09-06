@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+{% block title %}{{ item.title }} - Library{% endblock %}
+{% block breadcrumb %}Library / {{ item.title }}{% endblock %}
+{% block content %}
+<div class="mx-auto space-y-6">
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+        <div class="p-6 border-b border-gray-100 dark:border-gray-700">
+            <div class="flex items-start justify-between gap-4">
+                <div class="min-w-0">
+                    <h1 class="text-xl font-bold text-gray-900 dark:text-white">{{ item.title }}</h1>
+                    {% if item.description %}
+                    <p class="text-gray-500 dark:text-gray-400 mt-1">{{ item.description }}</p>
+                    {% endif %}
+                    <div class="flex items-center gap-3 mt-3 text-sm text-gray-500 dark:text-gray-400">
+                        {% if item.category %}
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400">
+                            {% if item.category.color %}<span class="w-2 h-2 rounded-full inline-block" style="background-color:{{ item.category.color }}"></span>{% endif %}
+                            {{ item.category.name }}
+                        </span>
+                        {% endif %}
+                        {% if item.file_type %}
+                        <span class="uppercase text-xs font-medium text-gray-400">{{ item.file_type }}</span>
+                        {% endif %}
+                        <span>{{ item.created_at|date:'M d, Y' }}</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 flex-shrink-0">
+                    <button onclick="toggleFavorite('{{ item.slug }}')" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors">
+                        <i data-lucide="star" class="w-5 h-5 {% if item.is_favorite %}text-amber-400 fill-amber-400{% else %}text-gray-400{% endif %}" id="fav-icon"></i>
+                    </button>
+                    <a href="{% url 'library_articles:edit' item.slug %}" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors text-gray-500">
+                        <i data-lucide="pencil" class="w-5 h-5"></i>
+                    </a>
+                    <button onclick="document.getElementById('delete-modal').classList.remove('hidden')" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors text-red-500">
+                        <i data-lucide="trash-2" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-6 space-y-6">
+            {% if item.file and item.file_type == 'pdf' %}
+            <div class="border border-gray-200 dark:border-gray-700 rounded overflow-hidden" style="height: 80vh;">
+                <iframe src="{{ item.file.url }}" class="w-full h-full" frameborder="0"></iframe>
+            </div>
+            {% endif %}
+
+            {% if item.file and item.file_type == 'image' %}
+            <div class="flex justify-center">
+                <img src="{{ item.file.url }}" alt="{{ item.title }}" class="max-w-full max-h-[70vh] object-contain rounded border border-gray-200 dark:border-gray-700">
+            </div>
+            {% endif %}
+
+            {% if item.file and item.file_type == 'txt' or item.file and item.file_type == 'md' %}
+            <div class="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded overflow-auto max-h-[60vh]">
+                <iframe src="{{ item.file.url }}" class="w-full h-[60vh] border-0" sandbox="allow-same-origin"></iframe>
+            </div>
+            {% endif %}
+
+            {% if item.content %}
+            <div class="prose prose-sm max-w-none dark:prose-invert">
+                {{ item.content|safe }}
+            </div>
+            {% endif %}
+
+            {% if item.file and item.file_type != 'pdf' and item.file_type != 'image' and item.file_type != 'txt' and item.file_type != 'md' %}
+            <div class="p-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded flex items-center gap-3">
+                <i data-lucide="file" class="w-8 h-8 text-gray-400"></i>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ item.file.name|cut:'library/files/' }}</p>
+                    <p class="text-xs text-gray-500">{{ item.file.size|filesizeformat }}</p>
+                </div>
+                <a href="{{ item.file.url }}" download class="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white text-sm rounded-[20px] transition-colors inline-flex items-center gap-1">
+                    <i data-lucide="download" class="w-4 h-4"></i>
+                    Download
+                </a>
+            </div>
+            {% endif %}
+
+            {% if item.attachments.all %}
+            <div class="border-t border-gray-100 dark:border-gray-700 pt-4">
+                <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">Attachments</h3>
+                <div class="space-y-2">
+                    {% for att in item.attachments.all %}
+                    <div class="flex items-center gap-3 p-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded transition-colors">
+                        {% with att_name=att.name|lower %}
+                        {% if '.jpg' in att_name or '.jpeg' in att_name or '.png' in att_name or '.gif' in att_name or '.webp' in att_name %}
+                            <i data-lucide="image" class="w-4 h-4 text-blue-400"></i>
+                        {% elif '.pdf' in att_name %}
+                            <i data-lucide="file-text" class="w-4 h-4 text-red-400"></i>
+                        {% elif '.txt' in att_name or '.md' in att_name %}
+                            <i data-lucide="file-type" class="w-4 h-4 text-gray-400"></i>
+                        {% else %}
+                            <i data-lucide="paperclip" class="w-4 h-4 text-gray-400"></i>
+                        {% endif %}
+                        {% endwith %}
+                        <span class="flex-1 text-sm text-gray-700 dark:text-gray-300 truncate">{{ att.name }}</span>
+                        <button onclick="previewAttachment('{{ att.file.url }}', '{{ att.name }}')" class="p-1 text-gray-400 hover:text-indigo-500 transition-colors" title="Preview">
+                            <i data-lucide="eye" class="w-4 h-4"></i>
+                        </button>
+                        <a href="{{ att.file.url }}" download class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline">Download</a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if item.tags.all %}
+            <div class="border-t border-gray-100 dark:border-gray-700 pt-4">
+                <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">Tags</h3>
+                <div class="flex flex-wrap gap-2">
+                    {% for tag in item.tags.all %}
+                    <a href="{% url 'library_articles:tag_detail' tag.slug %}" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-800/40 transition-colors">{{ tag.name }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div id="delete-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center">
+    <div class="fixed inset-0 bg-black/50" onclick="document.getElementById('delete-modal').classList.add('hidden')"></div>
+    <div class="bg-white dark:bg-black rounded-lg shadow-xl z-10 max-w-md w-full mx-4 p-6 relative">
+        <div class="flex items-start gap-4">
+            <div class="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <i data-lucide="alert-triangle" class="w-5 h-5 text-red-600"></i>
+            </div>
+            <div class="flex-1">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Confirm Delete</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Delete <strong class="text-gray-700 dark:text-gray-300">{{ item.title }}</strong>?</p>
+                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">This action cannot be undone.</p>
+            </div>
+        </div>
+        <div class="flex justify-end gap-3 mt-6">
+            <button onclick="document.getElementById('delete-modal').classList.add('hidden')" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-[#1a1a1a] hover:bg-gray-200 dark:hover:bg-[#222] transition-colors">Cancel</button>
+            <form method="post" action="{% url 'library_articles:delete' item.slug %}">
+                {% csrf_token %}
+                <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 transition-colors">Delete</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function toggleFavorite(slug) {
+    fetch("{% url 'library_articles:favorite' item.slug %}")
+        .then(r => r.json())
+        .then(data => {
+            var icon = document.getElementById('fav-icon');
+            if (data.is_favorite) {
+                icon.classList.add('text-amber-400', 'fill-amber-400');
+                icon.classList.remove('text-gray-400');
+            } else {
+                icon.classList.remove('text-amber-400', 'fill-amber-400');
+                icon.classList.add('text-gray-400');
+            }
+        });
+}
+
+function previewAttachment(url, name) {
+    var ext = name.split('.').pop().toLowerCase();
+    var modal = document.getElementById('preview-modal');
+    var content = document.getElementById('preview-content');
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
+        content.innerHTML = '<img src="' + url + '" alt="' + name + '" class="max-w-full max-h-[80vh] object-contain mx-auto">';
+    } else if (ext === 'pdf') {
+        content.innerHTML = '<iframe src="' + url + '" class="w-full h-[80vh] border-0"></iframe>';
+    } else if (['txt', 'md'].includes(ext)) {
+        fetch(url).then(function(r) { return r.text(); }).then(function(text) {
+            content.innerHTML = '<pre class="p-4 bg-gray-50 dark:bg-gray-900 rounded overflow-auto max-h-[80vh] text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">' + text.replace(/</g, '&lt;') + '</pre>';
+        });
+    } else {
+        content.innerHTML = '<div class="p-8 text-center text-gray-500"><p>Preview not available for this file type.</p><a href="' + url + '" download class="mt-2 inline-block text-indigo-600 hover:underline">Download instead</a></div>';
+    }
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    lucide.createIcons();
+}
+
+function closePreviewModal() {
+    var modal = document.getElementById('preview-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    document.getElementById('preview-content').innerHTML = '';
+}
+</script>
+
+<div id="preview-modal" class="hidden fixed inset-0 z-50 items-center justify-center">
+    <div class="fixed inset-0 bg-black/70" onclick="closePreviewModal()"></div>
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl z-10 max-w-4xl w-full mx-4 relative">
+        <button onclick="closePreviewModal()" class="absolute top-2 right-2 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 z-10">
+            <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+        <div id="preview-content" class="p-4"></div>
+    </div>
+</div>
+{% endblock %}

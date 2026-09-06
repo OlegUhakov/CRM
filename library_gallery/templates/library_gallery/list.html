@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% block title %}Gallery - CRM{% endblock %}
+{% block breadcrumb %}Library / Gallery{% endblock %}
+{% block content %}
+<div class="space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-xl font-bold text-gray-900 dark:text-white">Gallery</h1>
+            <p class="text-gray-500 dark:text-gray-400 mt-1">All images from your library</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <div class="flex border border-gray-300 dark:border-gray-600 rounded overflow-hidden">
+                <a href="?{% if query %}q={{ query }}&{% endif %}{% if current_date %}date={{ current_date }}&{% endif %}view=list" class="px-3 py-1.5 text-sm {% if view_mode == 'list' %}bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white{% else %}bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700{% endif %} transition-colors">
+                    <i data-lucide="list" class="w-4 h-4"></i>
+                </a>
+                <a href="?{% if query %}q={{ query }}&{% endif %}{% if current_date %}date={{ current_date }}&{% endif %}view=grid" class="px-3 py-1.5 text-sm {% if view_mode == 'grid' %}bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white{% else %}bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700{% endif %} transition-colors">
+                    <i data-lucide="grid-3x3" class="w-4 h-4"></i>
+                </a>
+            </div>
+            <button onclick="document.getElementById('gallery-upload-input').click()" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white text-[14px] font-medium rounded-[20px] shadow-[0_2px_2px_rgba(0,0,0,0.25)] transition-colors">
+                <i data-lucide="upload" class="w-4 h-4"></i>
+                Upload Photo
+            </button>
+            <input type="file" id="gallery-upload-input" accept="image/*" multiple class="hidden" onchange="handleGalleryUpload(this.files)">
+        </div>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-4">
+        <div class="flex flex-col sm:flex-row gap-3">
+            <div class="flex-1 relative">
+                <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
+                <input type="text" id="gallery-search" placeholder="Search photos..." value="{{ query }}" class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-600 text-[14px] outline-none focus:border-violet-300 transition-colors">
+            </div>
+            <div class="flex items-center gap-2">
+                <label class="text-xs text-gray-500 dark:text-gray-400">Date:</label>
+                <select name="date" onchange="submitGalleryFilters()" class="px-3 py-2.5 text-sm border border-[#e8e8e8] dark:border-gray-600 dark:bg-gray-800 dark:text-white outline-none focus:border-violet-300 transition-colors">
+                    <option value="">All Time</option>
+                    <option value="today" {% if current_date == 'today' %}selected{% endif %}>Today</option>
+                    <option value="week" {% if current_date == 'week' %}selected{% endif %}>This Week</option>
+                    <option value="month" {% if current_date == 'month' %}selected{% endif %}>This Month</option>
+                    <option value="year" {% if current_date == 'year' %}selected{% endif %}>This Year</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div id="gallery-container">
+        {% include 'library_gallery/list_partial.html' %}
+    </div>
+</div>
+
+<div id="lightbox" class="fixed inset-0 z-50 bg-black/90 hidden items-center justify-center" onclick="closeLightbox()">
+    <button class="absolute top-4 right-4 text-white/70 hover:text-white" onclick="closeLightbox()">
+        <i data-lucide="x" class="w-8 h-8"></i>
+    </button>
+    <div class="max-w-4xl max-h-[90vh] p-4" onclick="event.stopPropagation()">
+        <img id="lightbox-img" src="" alt="" class="max-w-full max-h-[80vh] object-contain mx-auto">
+        <div class="text-center mt-4">
+            <p id="lightbox-title" class="text-white font-medium"></p>
+            <a id="lightbox-link" href="" class="text-violet-400 text-sm hover:underline mt-1 inline-block">View Document</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+var galleryDebounce = null;
+document.getElementById('gallery-search').addEventListener('input', function() {
+    var q = this.value;
+    clearTimeout(galleryDebounce);
+    galleryDebounce = setTimeout(function() {
+        htmx.ajax('GET', '{% url "library_gallery:list" %}?' + buildGalleryParams(q).toString(), {target: '#gallery-container', swap: 'innerHTML'});
+    }, 400);
+});
+
+function buildGalleryParams(q) {
+    var params = new URLSearchParams();
+    var query = (q !== undefined) ? q : document.getElementById('gallery-search').value;
+    if (query) params.set('q', query);
+    var date = document.querySelector('[name="date"]').value;
+    if (date) params.set('date', date);
+    params.set('view', '{{ view_mode }}');
+    return params;
+}
+
+function submitGalleryFilters() {
+    htmx.ajax('GET', '{% url "library_gallery:list" %}?' + buildGalleryParams().toString(), {target: '#gallery-container', swap: 'innerHTML'});
+}
+
+function handleGalleryUpload(files) {
+    if (!files || files.length === 0) return;
+    var done = 0;
+    for (var i = 0; i < files.length; i++) {
+        var fd = new FormData();
+        fd.append('file', files[i]);
+        fetch('{% url "library_gallery:upload" %}', {
+            method: 'POST', body: fd,
+            headers: {'X-CSRFToken': getGalleryCSRF()}
+        }).then(function(r) { return r.json(); }).then(function() {
+            done++;
+            if (done === files.length) window.location.reload();
+        }).catch(function() {
+            done++;
+            if (done === files.length) window.location.reload();
+        });
+    }
+    document.getElementById('gallery-upload-input').value = '';
+}
+
+function getGalleryCSRF() {
+    var cookies = document.cookie.split(';');
+    for (var i = 0; i < cookies.length; i++) {
+        var c = cookies[i].trim();
+        if (c.startsWith('csrftoken=')) return c.substring(10);
+    }
+    return '';
+}
+
+function openLightbox(url, title, link) {
+    var lightbox = document.getElementById('lightbox');
+    document.getElementById('lightbox-img').src = url;
+    document.getElementById('lightbox-title').textContent = title;
+    document.getElementById('lightbox-link').href = link;
+    lightbox.classList.remove('hidden');
+    lightbox.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox() {
+    var lightbox = document.getElementById('lightbox');
+    lightbox.classList.add('hidden');
+    lightbox.classList.remove('flex');
+    document.body.style.overflow = '';
+}
+</script>
+{% endblock %}

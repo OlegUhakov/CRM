@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}{{ item.title }} - Gallery{% endblock %}
+{% block breadcrumb %}Gallery / {{ item.title }}{% endblock %}
+{% block content %}
+<div class="mx-auto space-y-6">
+    <a href="{% url 'library_gallery:list' %}" class="text-sm text-violet-600 hover:underline">&larr; Back to Gallery</a>
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-6">
+        <h1 class="text-xl font-bold text-gray-900 dark:text-white">{{ item.title }}</h1>
+        {% if item.description %}<p class="text-gray-500 mt-1">{{ item.description }}</p>{% endif %}
+        <p class="text-xs text-gray-400 mt-2">{{ item.created_at|date:'M d, Y' }}{% if item.category %} · {{ item.category.name }}{% endif %}</p>
+    </div>
+    {% if item.file %}
+    <div class="flex justify-center bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-6">
+        <img src="{{ item.file.url }}" alt="{{ item.title }}" class="max-w-full max-h-[70vh] object-contain rounded">
+    </div>
+    <div class="flex gap-3">
+        <a href="{{ item.file.url }}" download class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-medium rounded-[20px] transition-colors">
+            <i data-lucide="download" class="w-4 h-4"></i> Download
+        </a>
+        <a href="{% url 'library_articles:detail' item.slug %}" class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-sm rounded-[20px] transition-colors">Open as Document</a>
+    </div>
+    {% elif item.preview_image %}
+    <div class="flex justify-center bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-6">
+        <img src="{{ item.preview_image.url }}" alt="{{ item.title }}" class="max-w-full max-h-[70vh] object-contain rounded">
+    </div>
+    {% endif %}
+    {% if item.content %}
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-6 prose dark:prose-invert max-w-none">{{ item.content|safe }}</div>
+    {% endif %}
+</div>
+{% endblock %}

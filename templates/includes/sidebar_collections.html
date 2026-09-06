@@ -1,31 +1,26 @@
 <nav class="space-y-3 text-[13px] flex-1">
-    <a href="{% url 'library:list' %}" class="flex items-center gap-2 w-full">
-        <i data-lucide="book-open" class="w-4 h-4 flex-shrink-0"></i>
-        <span class="sidebar-text flex-1">All Documents</span>
+    <a href="{% url 'library_articles:list' %}" class="flex items-center gap-2 w-full">
+        <i data-lucide="file-text" class="w-4 h-4 flex-shrink-0"></i>
+        <span class="sidebar-text flex-1">Articles</span>
     </a>
 
-    <a href="{% url 'library:create' %}" class="flex items-center gap-2 w-full">
-        <i data-lucide="plus" class="w-4 h-4 flex-shrink-0"></i>
-        <span class="sidebar-text flex-1">New Document</span>
+    <a href="{% url 'library_gallery:list' %}" class="flex items-center gap-2 w-full">
+        <i data-lucide="image" class="w-4 h-4 flex-shrink-0"></i>
+        <span class="sidebar-text flex-1">Gallery</span>
     </a>
 
-    <a href="{% url 'library:list' %}?favorites=1" class="flex items-center gap-2 w-full">
+    <a href="{% url 'library_files:list' %}" class="flex items-center gap-2 w-full">
+        <i data-lucide="folder-open" class="w-4 h-4 flex-shrink-0"></i>
+        <span class="sidebar-text flex-1">Files</span>
+    </a>
+
+    <a href="{% url 'library_articles:list' %}?favorites=1" class="flex items-center gap-2 w-full">
         <i data-lucide="star" class="w-4 h-4 flex-shrink-0" style="color: #FFA84C"></i>
         <span class="sidebar-text flex-1">Favorites</span>
     </a>
 
-    <a href="{% url 'library:category_list' %}" class="flex items-center gap-2 w-full">
+    <a href="{% url 'library_articles:category_list' %}" class="flex items-center gap-2 w-full">
         <i data-lucide="folder" class="w-4 h-4 flex-shrink-0"></i>
         <span class="sidebar-text flex-1">Categories</span>
-    </a>
-
-    <a href="{% url 'library:gallery' %}" class="flex items-center gap-2 w-full">
-        <i data-lucide="image" class="w-4 h-4 flex-shrink-0"></i>
-        <span class="sidebar-text flex-1">Photo Gallery</span>
-    </a>
-
-    <a href="{% url 'library:files' %}" class="flex items-center gap-2 w-full">
-        <i data-lucide="folder-open" class="w-4 h-4 flex-shrink-0"></i>
-        <span class="sidebar-text flex-1">Files Catalog</span>
     </a>
 </nav>

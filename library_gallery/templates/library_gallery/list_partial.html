@@ -1,0 +1,54 @@
+{% if items %}
+{% if view_mode == 'list' %}
+<div class="space-y-2">
+    {% for item in items %}
+    <a href="{% url 'library_gallery:detail' item.slug %}" class="flex items-center gap-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow p-3">
+        <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded overflow-hidden flex-shrink-0">
+            {% if item.file %}
+                <img src="{{ item.file.url }}" alt="{{ item.title }}" class="w-full h-full object-cover">
+            {% elif item.preview_image %}
+                <img src="{{ item.preview_image.url }}" alt="{{ item.title }}" class="w-full h-full object-cover">
+            {% else %}
+                <div class="w-full h-full flex items-center justify-center"><i data-lucide="image" class="w-6 h-6 text-gray-400"></i></div>
+            {% endif %}
+        </div>
+        <div class="min-w-0 flex-1">
+            <p class="font-medium text-gray-900 dark:text-white truncate">{{ item.title }}</p>
+            <p class="text-xs text-gray-400">{{ item.created_at|date:'M d, Y' }}{% if item.category %} · {{ item.category.name }}{% endif %}</p>
+        </div>
+        <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400 flex-shrink-0"></i>
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+    {% for item in items %}
+    <div class="group relative aspect-square bg-gray-100 dark:bg-gray-700 rounded overflow-hidden cursor-pointer" onclick="openLightbox('{% if item.file %}{{ item.file.url }}{% elif item.preview_image %}{{ item.preview_image.url }}{% endif %}', '{{ item.title|escapejs }}', '{% url 'library_gallery:detail' item.slug %}')">
+        {% if item.file %}
+            <img src="{{ item.file.url }}" alt="{{ item.title }}" class="w-full h-full object-cover transition-transform group-hover:scale-105" loading="lazy">
+        {% elif item.preview_image %}
+            <img src="{{ item.preview_image.url }}" alt="{{ item.title }}" class="w-full h-full object-cover transition-transform group-hover:scale-105" loading="lazy">
+        {% else %}
+            <div class="w-full h-full flex items-center justify-center">
+                <i data-lucide="image" class="w-8 h-8 text-gray-400"></i>
+            </div>
+        {% endif %}
+        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-end">
+            <div class="w-full p-2 text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                <p class="text-xs font-medium truncate">{{ item.title }}</p>
+                <p class="text-[10px] opacity-75">{{ item.created_at|date:'M d, Y' }}</p>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% include 'includes/pagination.html' with page_obj=items %}
+{% else %}
+<div class="text-center py-16 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+    <i data-lucide="image" class="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4"></i>
+    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">No images found</h3>
+    <p class="text-gray-500 dark:text-gray-400 mb-4">{% if query %}No results for "{{ query }}"{% else %}Upload photos to see them here{% endif %}</p>
+</div>
+{% endif %}

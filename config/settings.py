@@ -31,6 +31,9 @@ INSTALLED_APPS = [
     'assistant',
     'calendar_app',
     'library',
+    'library_articles',
+    'library_gallery',
+    'library_files',
 ]
 
 MIDDLEWARE = [

@@ -1,0 +1,53 @@
+{% if items %}
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    {% for item in items %}
+    <a href="{% url 'library_articles:detail' item.slug %}" class="group relative bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-all overflow-hidden">
+        <div class="p-4">
+            <div class="w-full h-32 bg-gray-100 dark:bg-gray-700 rounded overflow-hidden mb-3">
+                {% if item.preview_image %}
+                    <img src="{{ item.preview_image.url }}" alt="{{ item.title }}" class="w-full h-full object-cover">
+                {% elif item.file_type == 'image' and item.file %}
+                    <img src="{{ item.file.url }}" alt="{{ item.title }}" class="w-full h-full object-cover">
+                {% elif item.file_type == 'pdf' %}
+                    <div class="w-full h-full flex items-center justify-center">
+                        <i data-lucide="file-text" class="w-12 h-12 text-red-400"></i>
+                    </div>
+                {% elif item.content %}
+                    <div class="w-full h-full flex items-center justify-center">
+                        <i data-lucide="file-text" class="w-12 h-12 text-amber-400"></i>
+                    </div>
+                {% else %}
+                    <div class="w-full h-full flex items-center justify-center">
+                        <i data-lucide="file" class="w-12 h-12 text-gray-400"></i>
+                    </div>
+                {% endif %}
+            </div>
+            <h3 class="font-medium text-gray-900 dark:text-white truncate">{{ item.title }}</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">{{ item.summary|default:item.description|default:item.content|striptags|truncatewords:20|default:'No description' }}</p>
+            <div class="flex flex-wrap gap-1 mt-2">
+                {% for tag in item.tags.all|slice:":3" %}
+                <span class="text-[10px] px-1.5 py-0.5 rounded bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400">{{ tag.name }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="flex items-center justify-between px-4 py-2 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
+            <span class="text-xs text-gray-400">{{ item.created_at|date:'M d, Y' }}</span>
+            {% if item.is_favorite %}
+            <i data-lucide="star" class="w-3.5 h-3.5 text-amber-400 fill-amber-400"></i>
+            {% endif %}
+        </div>
+    </a>
+    {% endfor %}
+</div>
+
+{% include 'includes/pagination.html' with page_obj=items %}
+{% else %}
+<div class="text-center py-16 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+    <i data-lucide="file" class="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3"></i>
+    <p class="text-gray-500 dark:text-gray-400 mb-4">No documents in this category</p>
+    <a href="{% url 'library_articles:create' %}" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white text-[14px] font-medium rounded-[20px] shadow-[0_2px_2px_rgba(0,0,0,0.25)] transition-colors">
+        <i data-lucide="plus" class="w-4 h-4"></i>
+        Add Document
+    </a>
+</div>
+{% endif %}

@@ -1,0 +1,109 @@
+{% if items %}
+    {% if view_mode == 'grid' %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for item in items %}
+        <div class="group relative bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-all overflow-hidden">
+            <a href="{% url 'library_articles:detail' item.slug %}" class="block p-4">
+                <div class="flex items-start justify-between mb-3">
+                    <div class="w-full h-32 bg-gray-100 dark:bg-gray-700 rounded overflow-hidden mb-3">
+                        {% if item.preview_image %}
+                            <img src="{{ item.preview_image.url }}" alt="{{ item.title }}" class="w-full h-full object-cover">
+                        {% elif item.file_type == 'image' and item.file %}
+                            <img src="{{ item.file.url }}" alt="{{ item.title }}" class="w-full h-full object-cover">
+                        {% elif item.file_type == 'pdf' %}
+                            <div class="w-full h-full flex items-center justify-center">
+                                <i data-lucide="file-text" class="w-12 h-12 text-red-400"></i>
+                            </div>
+                        {% elif item.content %}
+                            <div class="w-full h-full flex items-center justify-center">
+                                <i data-lucide="file-text" class="w-12 h-12 text-amber-400"></i>
+                            </div>
+                        {% else %}
+                            <div class="w-full h-full flex items-center justify-center">
+                                <i data-lucide="file" class="w-12 h-12 text-gray-400"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <h3 class="font-medium text-gray-900 dark:text-white truncate">{{ item.title }}</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">{{ item.summary|default:item.description|default:item.content|striptags|truncatewords:20|default:'No description' }}</p>
+                <div class="flex flex-wrap gap-1 mt-2">
+                    {% for tag in item.tags.all|slice:":3" %}
+                    <span class="text-[10px] px-1.5 py-0.5 rounded bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400">{{ tag.name }}</span>
+                    {% endfor %}
+                </div>
+            </a>
+            <div class="flex items-center justify-between px-4 py-2 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
+                <div class="flex items-center gap-2">
+                    {% if item.category %}
+                    <span class="text-xs px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400">{{ item.category.name }}</span>
+                    {% endif %}
+                    {% if item.source_url %}
+                    <i data-lucide="link" class="w-3 h-3 text-violet-500" title="Imported from URL"></i>
+                    {% endif %}
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs text-gray-400">{{ item.created_at|date:'M d, Y' }}</span>
+                    {% if item.is_favorite %}
+                    <i data-lucide="star" class="w-3.5 h-3.5 text-amber-400 fill-amber-400"></i>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="space-y-2">
+        {% for item in items %}
+        <a href="{% url 'library_articles:detail' item.slug %}" class="block bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow p-4">
+            <div class="flex items-center justify-between gap-4">
+                <div class="flex items-center gap-3 min-w-0">
+                    {% if item.file_type == 'pdf' %}
+                        <i data-lucide="file-text" class="w-5 h-5 text-red-500 flex-shrink-0"></i>
+                    {% elif item.file_type == 'image' %}
+                        <i data-lucide="image" class="w-5 h-5 text-blue-500 flex-shrink-0"></i>
+                    {% elif item.file_type == 'md' or item.file_type == 'txt' %}
+                        <i data-lucide="file-type" class="w-5 h-5 text-gray-500 flex-shrink-0"></i>
+                    {% elif item.content %}
+                        <i data-lucide="sticky-note" class="w-5 h-5 text-amber-500 flex-shrink-0"></i>
+                    {% else %}
+                        <i data-lucide="file" class="w-5 h-5 text-gray-500 flex-shrink-0"></i>
+                    {% endif %}
+                    <div class="min-w-0">
+                        <p class="font-medium text-gray-900 dark:text-white truncate">{{ item.title }}</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ item.summary|default:item.description|default:item.content|striptags|truncatewords:15|default:'No description' }}</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 flex-shrink-0">
+                    {% for tag in item.tags.all|slice:":2" %}
+                    <span class="text-[10px] px-1.5 py-0.5 rounded bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400">{{ tag.name }}</span>
+                    {% endfor %}
+                    {% if item.category %}
+                    <span class="text-xs px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400">{{ item.category.name }}</span>
+                    {% endif %}
+                    {% if item.source_url %}
+                    <i data-lucide="link" class="w-3.5 h-3.5 text-violet-500"></i>
+                    {% endif %}
+                    <span class="text-xs text-gray-400">{{ item.created_at|date:'M d, Y' }}</span>
+                    {% if item.is_favorite %}
+                    <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+                    {% endif %}
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% include 'includes/pagination.html' with page_obj=items %}
+{% else %}
+<div class="text-center py-16 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+    <i data-lucide="book-open" class="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4"></i>
+    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">No documents found</h3>
+    <p class="text-gray-500 dark:text-gray-400 mb-4">{% if query %}No results for "{{ query }}"{% else %}Your library is empty{% endif %}</p>
+    <a href="{% url 'library_articles:create' %}" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white text-[14px] font-medium rounded-[20px] shadow-[0_2px_2px_rgba(0,0,0,0.25)] transition-colors">
+        <i data-lucide="plus" class="w-4 h-4"></i>
+        Create Document
+    </a>
+</div>
+{% endif %}

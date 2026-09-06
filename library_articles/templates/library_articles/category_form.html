@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} - Library{% endblock %}
+{% block breadcrumb %}Library / Categories / {{ title }}{% endblock %}
+{% block content %}
+<div class="max-w-lg mx-auto">
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+        <div class="p-6 border-b border-gray-100 dark:border-gray-700">
+            <h1 class="text-xl font-bold text-gray-900 dark:text-white">{{ title }}</h1>
+        </div>
+        <form method="post" class="p-6 space-y-4">
+            {% csrf_token %}
+            {% for field in form %}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}<p class="mt-1 text-xs text-gray-400">{{ field.help_text }}</p>{% endif %}
+                {% if field.errors %}<p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ field.errors.0 }}</p>{% endif %}
+            </div>
+            {% endfor %}
+            <div class="flex gap-3 pt-2">
+                <button type="submit" class="px-4 py-2.5 bg-indigo-500 hover:bg-indigo-600 rounded-[20px] text-white shadow-[0_2px_2px_rgba(0,0,0,0.25)] text-[14px] font-medium transition-colors">
+                    {% if category %}Save{% else %}Create{% endif %}
+                </button>
+                <a href="{% url 'library_articles:category_list' %}" class="px-4 py-2.5 text-[#666] bg-gray-100 hover:bg-gray-200 transition-colors text-[14px] rounded-[20px]">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+{% block title %}Files - CRM{% endblock %}
+{% block breadcrumb %}Library / Files{% endblock %}
+{% block content %}
+<div class="space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-xl font-bold text-gray-900 dark:text-white">Files</h1>
+            <p class="text-gray-500 dark:text-gray-400 mt-1">All uploaded files and documents</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <div class="flex border border-gray-300 dark:border-gray-600 rounded overflow-hidden">
+                <a href="?{% if query %}q={{ query }}&{% endif %}{% if current_type %}type={{ current_type }}&{% endif %}{% if current_date %}date={{ current_date }}&{% endif %}{% if current_sort %}sort={{ current_sort }}&{% endif %}view=list" class="px-3 py-1.5 text-sm {% if view_mode == 'list' %}bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white{% else %}bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700{% endif %} transition-colors">
+                    <i data-lucide="list" class="w-4 h-4"></i>
+                </a>
+                <a href="?{% if query %}q={{ query }}&{% endif %}{% if current_type %}type={{ current_type }}&{% endif %}{% if current_date %}date={{ current_date }}&{% endif %}{% if current_sort %}sort={{ current_sort }}&{% endif %}view=grid" class="px-3 py-1.5 text-sm {% if view_mode == 'grid' %}bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white{% else %}bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700{% endif %} transition-colors">
+                    <i data-lucide="grid-3x3" class="w-4 h-4"></i>
+                </a>
+            </div>
+            <button onclick="document.getElementById('files-upload-input').click()" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white text-[14px] font-medium rounded-[20px] shadow-[0_2px_2px_rgba(0,0,0,0.25)] transition-colors">
+                <i data-lucide="upload" class="w-4 h-4"></i>
+                Upload File
+            </button>
+            <input type="file" id="files-upload-input" multiple class="hidden" onchange="handleFilesUpload(this.files)">
+        </div>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-4">
+        <div class="flex flex-col sm:flex-row gap-3 mb-4">
+            <div class="flex-1 relative">
+                <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
+                <input type="text" id="files-search" placeholder="Search files..." value="{{ query }}" class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-600 text-[14px] outline-none focus:border-violet-300 transition-colors">
+            </div>
+            <div class="flex items-center gap-2">
+                <label class="text-xs text-gray-500 dark:text-gray-400">Date:</label>
+                <select name="date" onchange="submitFilesFilters()" class="px-3 py-2.5 text-sm border border-[#e8e8e8] dark:border-gray-600 dark:bg-gray-800 dark:text-white outline-none focus:border-violet-300 transition-colors">
+                    <option value="">All Time</option>
+                    <option value="today" {% if current_date == 'today' %}selected{% endif %}>Today</option>
+                    <option value="week" {% if current_date == 'week' %}selected{% endif %}>This Week</option>
+                    <option value="month" {% if current_date == 'month' %}selected{% endif %}>This Month</option>
+                    <option value="year" {% if current_date == 'year' %}selected{% endif %}>This Year</option>
+                </select>
+            </div>
+        </div>
+        <div class="flex items-center gap-3 mb-4">
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Filter by Type:</span>
+            <div class="flex flex-wrap gap-2">
+                <button onclick="filterFilesByType('')" class="px-3 py-1.5 text-sm rounded-full {% if not current_type %}bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400{% else %}bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600{% endif %} transition-colors">
+                    All
+                </button>
+                {% for key, label in file_types %}
+                <button onclick="filterFilesByType('{{ key }}')" class="px-3 py-1.5 text-sm rounded-full {% if current_type == key %}bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400{% else %}bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600{% endif %} transition-colors">
+                    {{ label }}
+                </button>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div id="drop-zone" class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center cursor-pointer hover:border-violet-400 hover:bg-violet-50/50 dark:hover:bg-violet-900/10 transition-colors">
+            <i data-lucide="cloud-upload" class="w-12 h-12 text-gray-400 mx-auto mb-3"></i>
+            <p class="text-gray-600 dark:text-gray-400 font-medium">Drag &amp; drop files here</p>
+            <p class="text-sm text-gray-400 dark:text-gray-500 mt-1">or click to browse</p>
+        </div>
+    </div>
+
+    <div id="upload-progress" class="hidden">
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-4">
+            <div class="flex items-center gap-3">
+                <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-violet-500"></div>
+                <span class="text-sm text-gray-600 dark:text-gray-400">Uploading files...</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="files-container">
+        {% include 'library_files/list_partial.html' %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+var dropZone = document.getElementById('drop-zone');
+var filesDebounce = null;
+
+document.getElementById('files-search').addEventListener('input', function() {
+    var q = this.value;
+    clearTimeout(filesDebounce);
+    filesDebounce = setTimeout(function() {
+        htmx.ajax('GET', buildFilesUrl({q: q}), {target: '#files-container', swap: 'innerHTML'});
+    }, 400);
+});
+
+dropZone.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    dropZone.classList.add('border-violet-400', 'bg-violet-50/50', 'dark:bg-violet-900/10');
+});
+
+dropZone.addEventListener('dragleave', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    dropZone.classList.remove('border-violet-400', 'bg-violet-50/50', 'dark:bg-violet-900/10');
+});
+
+dropZone.addEventListener('drop', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    dropZone.classList.remove('border-violet-400', 'bg-violet-50/50', 'dark:bg-violet-900/10');
+    if (e.dataTransfer.files.length > 0) {
+        handleFilesUpload(e.dataTransfer.files);
+    }
+});
+
+dropZone.addEventListener('click', function() {
+    document.getElementById('files-upload-input').click();
+});
+
+function handleFilesUpload(files) {
+    if (!files || files.length === 0) return;
+    document.getElementById('upload-progress').classList.remove('hidden');
+    var uploaded = 0;
+    var total = files.length;
+    for (var i = 0; i < files.length; i++) {
+        var formData = new FormData();
+        formData.append('file', files[i]);
+        fetch('{% url "library_files:upload" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {'X-CSRFToken': getFilesCSRF()}
+        }).then(function(r) { return r.json(); }).then(function() {
+            uploaded++;
+            if (uploaded === total) window.location.reload();
+        }).catch(function() {
+            uploaded++;
+            if (uploaded === total) window.location.reload();
+        });
+    }
+    document.getElementById('files-upload-input').value = '';
+}
+
+function filterFilesByType(type) {
+    htmx.ajax('GET', buildFilesUrl({type: type}), {target: '#files-container', swap: 'innerHTML'});
+}
+
+function submitFilesFilters() {
+    htmx.ajax('GET', buildFilesUrl({}), {target: '#files-container', swap: 'innerHTML'});
+}
+
+function buildFilesUrl(params) {
+    var url = '{% url "library_files:list" %}';
+    var queryParts = [];
+    var q = (params.q !== undefined) ? params.q : document.getElementById('files-search').value;
+    if (q) queryParts.push('q=' + encodeURIComponent(q));
+    var type = (params.type !== undefined) ? params.type : '{{ current_type|default:"" }}';
+    if (type) queryParts.push('type=' + encodeURIComponent(type));
+    var date = document.querySelector('[name="date"]').value;
+    if (date) queryParts.push('date=' + encodeURIComponent(date));
+    queryParts.push('sort={{ current_sort|default:"-created_at" }}');
+    queryParts.push('view={{ view_mode }}');
+    if (queryParts.length > 0) url += '?' + queryParts.join('&');
+    return url;
+}
+
+function getFilesCSRF() {
+    var cookies = document.cookie.split(';');
+    for (var i = 0; i < cookies.length; i++) {
+        var c = cookies[i].trim();
+        if (c.startsWith('csrftoken=')) return c.substring(10);
+    }
+    return '';
+}
+</script>
+{% endblock %}

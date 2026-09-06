@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+{% block title %}Articles - CRM{% endblock %}
+{% block breadcrumb %}Library / Articles{% endblock %}
+{% block content %}
+<div class="space-y-4">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-xl font-bold text-gray-900 dark:text-white">Articles</h1>
+            <p class="text-gray-500 dark:text-gray-400 mt-1">Browse articles in your knowledge base</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <div class="flex border border-gray-300 dark:border-gray-600 rounded overflow-hidden">
+                <a href="?{% if query %}q={{ query }}&{% endif %}{% if current_category %}category={{ current_category }}&{% endif %}{% if current_type %}type={{ current_type }}&{% endif %}{% if favorites_only %}favorites=1&{% endif %}{% if current_tag %}tag={{ current_tag }}&{% endif %}{% if current_date %}date={{ current_date }}&{% endif %}view=list" class="px-3 py-1.5 text-sm {% if view_mode == 'list' %}bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white{% else %}bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700{% endif %} transition-colors">
+                    <i data-lucide="list" class="w-4 h-4"></i>
+                </a>
+                <a href="?{% if query %}q={{ query }}&{% endif %}{% if current_category %}category={{ current_category }}&{% endif %}{% if current_type %}type={{ current_type }}&{% endif %}{% if favorites_only %}favorites=1&{% endif %}{% if current_tag %}tag={{ current_tag }}&{% endif %}{% if current_date %}date={{ current_date }}&{% endif %}view=grid" class="px-3 py-1.5 text-sm {% if view_mode == 'grid' %}bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white{% else %}bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700{% endif %} transition-colors">
+                    <i data-lucide="grid-3x3" class="w-4 h-4"></i>
+                </a>
+            </div>
+            <a href="{% url 'library_articles:create' %}" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white text-[14px] font-medium rounded-[20px] shadow-[0_2px_2px_rgba(0,0,0,0.25)] transition-colors">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                New Article
+            </a>
+        </div>
+    </div>
+
+    <div id="search-panel" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-4">
+        <div class="flex flex-col sm:flex-row gap-3">
+            <div class="flex-1 relative">
+                <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
+                <input type="text" id="search-input" placeholder="Search articles..." value="{{ query }}" name="q" class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-600 text-[14px] outline-none focus:border-violet-300 transition-colors">
+            </div>
+            <div class="flex items-center gap-2">
+                <select id="search-engine" class="px-3 py-2.5 border border-gray-200 dark:border-gray-600 dark:bg-gray-900 text-[14px] outline-none focus:border-violet-300 transition-colors">
+                    <option value="crm">In Articles (CRM)</option>
+                    <option value="google">Google</option>
+                    <option value="duckduckgo">DuckDuckGo</option>
+                </select>
+                <button type="button" onclick="performExternalSearch()" class="px-4 py-2.5 bg-violet-500 hover:bg-violet-600 text-white text-[14px] font-medium rounded transition-colors">
+                    Search
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-4">
+        <div class="flex flex-wrap items-center gap-3">
+            <div class="flex items-center gap-2">
+                <label class="text-xs text-gray-500 dark:text-gray-400">Category:</label>
+                <select name="category" onchange="submitFilters()" class="px-3 py-1.5 text-sm border border-[#e8e8e8] dark:border-gray-600 dark:bg-gray-800 dark:text-white outline-none focus:border-violet-300 transition-colors">
+                    <option value="">All</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.slug }}" {% if current_category == cat.slug %}selected{% endif %}>{{ cat.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <label class="text-xs text-gray-500 dark:text-gray-400">Type:</label>
+                <select name="type" onchange="submitFilters()" class="px-3 py-1.5 text-sm border border-[#e8e8e8] dark:border-gray-600 dark:bg-gray-800 dark:text-white outline-none focus:border-violet-300 transition-colors">
+                    <option value="">All</option>
+                    {% for key, label in file_types %}
+                    <option value="{{ key }}" {% if current_type == key %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <label class="text-xs text-gray-500 dark:text-gray-400">Date:</label>
+                <select name="date" onchange="submitFilters()" class="px-3 py-1.5 text-sm border border-[#e8e8e8] dark:border-gray-600 dark:bg-gray-800 dark:text-white outline-none focus:border-violet-300 transition-colors">
+                    <option value="">All Time</option>
+                    <option value="today" {% if current_date == 'today' %}selected{% endif %}>Today</option>
+                    <option value="week" {% if current_date == 'week' %}selected{% endif %}>This Week</option>
+                    <option value="month" {% if current_date == 'month' %}selected{% endif %}>This Month</option>
+                    <option value="year" {% if current_date == 'year' %}selected{% endif %}>This Year</option>
+                </select>
+            </div>
+
+            <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+                <input type="checkbox" name="favorites" value="1" onchange="submitFilters()" {% if favorites_only %}checked{% endif %} class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                Favorites
+            </label>
+
+            <input type="hidden" name="view" value="{{ view_mode }}">
+        </div>
+
+        {% if tags %}
+        <div class="flex flex-wrap items-center gap-1.5 mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+            <span class="text-xs text-gray-500 dark:text-gray-400 mr-1">Tags:</span>
+            {% for tag in tags %}
+            <a href="?tag={{ tag.slug }}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_type %}&type={{ current_type }}{% endif %}{% if current_date %}&date={{ current_date }}{% endif %}&view={{ view_mode }}" class="inline-flex items-center px-2 py-0.5 text-xs rounded-full {% if current_tag == tag.slug %}bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400{% else %}bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600{% endif %} transition-colors">
+                {{ tag.name }}
+            </a>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    <div id="library-items">
+        {% include 'library_articles/list_partial.html' %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+var searchDebounce = null;
+
+document.getElementById('search-input').addEventListener('input', function() {
+    var query = this.value;
+    var engine = document.getElementById('search-engine').value;
+
+    if (engine !== 'crm') return;
+
+    clearTimeout(searchDebounce);
+    searchDebounce = setTimeout(function() {
+        var params = buildParams();
+        params.set('q', query);
+        htmx.ajax('GET', '{% url "library_articles:list" %}?' + params.toString(), {target: '#library-items', swap: 'innerHTML'});
+    }, 400);
+});
+
+document.getElementById('search-input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        performExternalSearch();
+    }
+});
+
+function performExternalSearch() {
+    var query = document.getElementById('search-input').value;
+    var engine = document.getElementById('search-engine').value;
+
+    if (engine === 'crm') {
+        var params = buildParams();
+        params.set('q', query);
+        htmx.ajax('GET', '{% url "library_articles:list" %}?' + params.toString(), {target: '#library-items', swap: 'innerHTML'});
+        return;
+    }
+
+    if (!query.trim()) return;
+
+    var url;
+    if (engine === 'google') {
+        url = 'https://www.google.com/search?q=' + encodeURIComponent(query);
+    } else if (engine === 'duckduckgo') {
+        url = 'https://duckduckgo.com/?q=' + encodeURIComponent(query);
+    }
+
+    if (url) {
+        var win = window.open(url, '_blank');
+        if (!win) alert('Please allow popups for this site');
+    }
+}
+
+function buildParams() {
+    var params = new URLSearchParams();
+    var q = document.getElementById('search-input').value;
+    if (q) params.set('q', q);
+    params.set('view', '{{ view_mode }}');
+
+    var category = document.querySelector('[name="category"]').value;
+    if (category) params.set('category', category);
+
+    var type = document.querySelector('[name="type"]').value;
+    if (type) params.set('type', type);
+
+    var date = document.querySelector('[name="date"]').value;
+    if (date) params.set('date', date);
+
+    var fav = document.querySelector('[name="favorites"]');
+    if (fav && fav.checked) params.set('favorites', '1');
+
+    var currentTag = '{{ current_tag|default:"" }}';
+    if (currentTag) params.set('tag', currentTag);
+
+    return params;
+}
+
+function submitFilters() {
+    var params = buildParams();
+    htmx.ajax('GET', '{% url "library_articles:list" %}?' + params.toString(), {target: '#library-items', swap: 'innerHTML'});
+}
+</script>
+{% endblock %}

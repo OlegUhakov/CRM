@@ -1,0 +1,104 @@
+{% if items %}
+{% if view_mode == 'grid' %}
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    {% for item in items %}
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow p-4">
+        <div class="flex items-start gap-3">
+            {% if item.file_type == 'pdf' %}
+                <i data-lucide="file-text" class="w-8 h-8 text-red-500 flex-shrink-0"></i>
+            {% elif item.file_type == 'docx' %}
+                <i data-lucide="file-text" class="w-8 h-8 text-blue-500 flex-shrink-0"></i>
+            {% elif item.file_type == 'image' %}
+                <i data-lucide="image" class="w-8 h-8 text-blue-500 flex-shrink-0"></i>
+            {% else %}
+                <i data-lucide="file" class="w-8 h-8 text-gray-500 flex-shrink-0"></i>
+            {% endif %}
+            <div class="min-w-0 flex-1">
+                <a href="{% url 'library_files:detail' item.slug %}" class="font-medium text-gray-900 dark:text-white hover:text-violet-600 truncate block">{{ item.title }}</a>
+                <p class="text-xs text-gray-400 truncate">{{ item.file.name }}</p>
+                <p class="text-xs text-gray-400 mt-1">{{ item.get_file_type_display|default:'Unknown' }} · {{ item.created_at|date:'M d, Y' }}</p>
+            </div>
+        </div>
+        <div class="flex items-center justify-end gap-2 mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+            {% if item.file %}
+            <a href="{{ item.file.url }}" download class="text-gray-400 hover:text-violet-500" title="Download"><i data-lucide="download" class="w-4 h-4"></i></a>
+            {% endif %}
+            <a href="{% url 'library_files:detail' item.slug %}" class="text-gray-400 hover:text-violet-500" title="View"><i data-lucide="eye" class="w-4 h-4"></i></a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <table class="w-full">
+        <thead class="bg-gray-50 dark:bg-gray-900/50">
+            <tr>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Name</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Type</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Category</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</th>
+                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+            {% for item in items %}
+            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                <td class="px-4 py-3">
+                    <div class="flex items-center gap-3">
+                        {% if item.file_type == 'pdf' %}
+                            <i data-lucide="file-text" class="w-5 h-5 text-red-500 flex-shrink-0"></i>
+                        {% elif item.file_type == 'docx' %}
+                            <i data-lucide="file-text" class="w-5 h-5 text-blue-500 flex-shrink-0"></i>
+                        {% elif item.file_type == 'image' %}
+                            <i data-lucide="image" class="w-5 h-5 text-blue-500 flex-shrink-0"></i>
+                        {% else %}
+                            <i data-lucide="file" class="w-5 h-5 text-gray-500 flex-shrink-0"></i>
+                        {% endif %}
+                        <div class="min-w-0">
+                            <a href="{% url 'library_files:detail' item.slug %}" class="text-sm font-medium text-gray-900 dark:text-white hover:text-violet-600 dark:hover:text-violet-400">{{ item.title }}</a>
+                            {% if item.file %}
+                            <p class="text-xs text-gray-400 truncate max-w-xs">{{ item.file.name }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </td>
+                <td class="px-4 py-3">
+                    <span class="text-xs px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400">{{ item.get_file_type_display|default:'Unknown' }}</span>
+                </td>
+                <td class="px-4 py-3">
+                    {% if item.category %}
+                    <span class="text-xs text-gray-600 dark:text-gray-400">{{ item.category.name }}</span>
+                    {% else %}
+                    <span class="text-xs text-gray-400">—</span>
+                    {% endif %}
+                </td>
+                <td class="px-4 py-3">
+                    <span class="text-xs text-gray-400">{{ item.created_at|date:'M d, Y' }}</span>
+                </td>
+                <td class="px-4 py-3 text-right">
+                    <div class="flex items-center justify-end gap-2">
+                        {% if item.file %}
+                        <a href="{{ item.file.url }}" download class="text-gray-400 hover:text-violet-500" title="Download">
+                            <i data-lucide="download" class="w-4 h-4"></i>
+                        </a>
+                        {% endif %}
+                        <a href="{% url 'library_files:detail' item.slug %}" class="text-gray-400 hover:text-violet-500" title="View">
+                            <i data-lucide="eye" class="w-4 h-4"></i>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+{% include 'includes/pagination.html' with page_obj=items %}
+{% else %}
+<div class="text-center py-16 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+    <i data-lucide="folder-open" class="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4"></i>
+    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">No files found</h3>
+    <p class="text-gray-500 dark:text-gray-400 mb-4">{% if query %}No results for "{{ query }}"{% else %}Upload files to see them here{% endif %}</p>
+</div>
+{% endif %}

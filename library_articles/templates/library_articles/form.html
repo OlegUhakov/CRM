@@ -1,0 +1,455 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} - Library{% endblock %}
+{% block breadcrumb %}Library / {{ title }}{% endblock %}
+{% block content %}
+<div class="mx-auto">
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+        <div class="p-6 border-b border-gray-100 dark:border-gray-700">
+            <h1 class="text-xl font-bold text-gray-900 dark:text-white">{{ title }}</h1>
+        </div>
+
+        <div class="border-b border-gray-100 dark:border-gray-700">
+            <nav class="flex gap-6 px-6" role="tablist">
+                <button onclick="switchTab('editor')" id="tab-editor" class="py-3 text-sm font-medium border-b-2 border-violet-500 text-violet-600" role="tab">
+                    <i data-lucide="edit-3" class="w-4 h-4 inline mr-1"></i>
+                    Manual Editor
+                </button>
+                <button onclick="switchTab('import')" id="tab-import" class="py-3 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700" role="tab">
+                    <i data-lucide="link" class="w-4 h-4 inline mr-1"></i>
+                    Import by URL
+                </button>
+            </nav>
+        </div>
+
+        <div id="tab-content-editor" class="p-6">
+            <form method="post" enctype="multipart/form-data" class="space-y-4">
+                {% csrf_token %}
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ form.title.label }}</label>
+                    {{ form.title }}
+                    {% if form.title.errors %}<p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.title.errors.0 }}</p>{% endif %}
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ form.description.label }}</label>
+                    {{ form.description }}
+                    {% if form.description.errors %}<p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.description.errors.0 }}</p>{% endif %}
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Content</label>
+                    <div id="editor-container" style="height: 400px;" class="border border-[#e8e8e8] dark:border-gray-600 dark:bg-gray-900">{{ form.content.value|default:''|safe }}</div>
+                    {{ form.content }}
+                    {% if form.content.errors %}<p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.content.errors.0 }}</p>{% endif %}
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Main File</label>
+                    {{ form.file }}
+                    {% if form.file.errors %}<p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.file.errors.0 }}</p>{% endif %}
+                    {% if item and item.file %}
+                    <p class="mt-1 text-xs text-gray-500">Current: {{ item.file.name }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4">
+                    <div class="flex flex-wrap items-center gap-4">
+                        <div class="flex items-center gap-2">
+                            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ form.category.label }}:</label>
+                            <div class="flex gap-1">
+                                {{ form.category }}
+                                <button type="button" onclick="openCategoryModal()" class="px-2 py-1 bg-violet-100 hover:bg-violet-200 text-violet-700 rounded text-sm transition-colors" title="Create new category">
+                                    <i data-lucide="plus" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2 flex-1 min-w-[200px]">
+                            <label class="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">{{ form.tags_input.label }}:</label>
+                            <div class="flex gap-1 flex-1">
+                                {{ form.tags_input }}
+                                <button type="button" onclick="openTagModal()" class="px-2 py-1 bg-violet-100 hover:bg-violet-200 text-violet-700 rounded text-sm transition-colors" title="Create new tag">
+                                    <i data-lucide="plus" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <label class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                            {{ form.is_favorite }}
+                            {{ form.is_favorite.label }}
+                        </label>
+                    </div>
+                    {% if item and item.source_url %}
+                    <div class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                        <span class="text-xs text-gray-500 dark:text-gray-400">Source: </span>
+                        <a href="{{ item.source_url }}" target="_blank" class="text-xs text-violet-600 dark:text-violet-400 hover:underline">{{ item.source_url }}</a>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <datalist id="existing-tags">
+                    {% for tag in existing_tags %}
+                    <option value="{{ tag.name }}">
+                    {% endfor %}
+                </datalist>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Additional Files</label>
+                    <div id="drop-zone" class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded p-6 text-center cursor-pointer hover:border-indigo-400 transition-colors" onclick="document.getElementById('file-input').click()">
+                        <i data-lucide="upload" class="w-8 h-8 text-gray-400 mx-auto mb-2"></i>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{% if item %}Drop files here or click to upload{% else %}Drop files here — they will be saved with the document{% endif %}</p>
+                    </div>
+                    <input type="file" id="file-input" multiple class="hidden" onchange="uploadFiles(this.files)">
+                    <input type="file" id="additional-files" name="additional_files" multiple class="hidden">
+                    <div id="attachment-list" class="mt-2 space-y-1">
+                        {% if item %}
+                        {% for att in item.attachments.all %}
+                        <div id="att-{{ att.pk }}" class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                            <i data-lucide="paperclip" class="w-4 h-4 flex-shrink-0"></i>
+                            <span class="flex-1 truncate">{{ att.name }}</span>
+                            <button type="button" onclick="deleteAttachment({{ att.pk }}, '{{ att.name }}')" class="p-1 text-gray-400 hover:text-red-500 transition-colors flex-shrink-0" title="Delete">
+                                <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="flex gap-3 pt-2">
+                    <button type="submit" class="px-4 py-2.5 bg-indigo-500 hover:bg-indigo-600 rounded-[20px] text-white shadow-[0_2px_2px_rgba(0,0,0,0.25)] text-[14px] font-medium transition-colors">
+                        {% if item %}Save Changes{% else %}Create{% endif %}
+                    </button>
+                    <a href="{% if item %}{% url 'library_articles:detail' item.slug %}{% else %}{% url 'library_articles:list' %}{% endif %}" class="px-4 py-2.5 text-[#666] bg-gray-100 hover:bg-gray-200 transition-colors text-[14px] rounded-[20px]">Cancel</a>
+                </div>
+            </form>
+        </div>
+
+
+        <div id="tab-content-import" class="p-6 hidden">
+            <form method="post" action="{% url 'library_articles:import_url' %}" class="space-y-4">
+                {% csrf_token %}
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">URL to Import</label>
+                    <div class="flex gap-2">
+                        <input type="url" name="url" placeholder="https://example.com/article" required class="flex-1 px-4 py-2.5 border border-[#e8e8e8] text-[14px] outline-none focus:border-violet-300 transition-colors">
+                        <button type="submit" class="inline-flex items-center gap-2 px-4 py-2.5 bg-violet-500 hover:bg-violet-600 text-white text-[14px] font-medium rounded transition-colors">
+                            <i data-lucide="download" class="w-4 h-4"></i>
+                            Extract
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
+                    <select name="category" class="w-full px-4 py-2.5 border border-[#e8e8e8] text-[14px] outline-none focus:border-violet-300 transition-colors">
+                        <option value="">Select category (optional)</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat.id }}">{{ cat.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tags</label>
+                    <input type="text" name="tags_input" placeholder="Enter tags separated by commas" class="w-full px-4 py-2.5 border border-[#e8e8e8] text-[14px] outline-none focus:border-violet-300 transition-colors">
+                </div>
+            </form>
+        </div>
+
+
+<div id="category-modal" class="fixed inset-0 z-50 bg-black/50 hidden items-center justify-center">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-sm w-full mx-4" onclick="event.stopPropagation()">
+        <div class="p-6 border-b border-gray-100 dark:border-gray-700">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Quick Create Category</h2>
+        </div>
+        <form id="quick-category-form" class="p-6 space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
+                <input type="text" name="name" required placeholder="Category name" class="w-full px-4 py-2.5 border border-[#e8e8e8] text-[14px] outline-none focus:border-violet-300 transition-colors">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Color</label>
+                <input type="color" name="color" value="#8B5CF6" class="w-full h-10 border border-[#e8e8e8] cursor-pointer">
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button type="submit" class="px-4 py-2.5 bg-indigo-500 hover:bg-indigo-600 rounded-[20px] text-white shadow-[0_2px_2px_rgba(0,0,0,0.25)] text-[14px] font-medium transition-colors">
+                    Create
+                </button>
+                <button type="button" onclick="closeCategoryModal()" class="px-4 py-2.5 text-[#666] bg-gray-100 hover:bg-gray-200 transition-colors text-[14px] rounded-[20px]">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="tag-modal" class="fixed inset-0 z-50 bg-black/50 hidden items-center justify-center">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-sm w-full mx-4" onclick="event.stopPropagation()">
+        <div class="p-6 border-b border-gray-100 dark:border-gray-700">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Quick Create Tag</h2>
+        </div>
+        <form id="quick-tag-form" class="p-6 space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tag Name</label>
+                <input type="text" name="name" required placeholder="Tag name" class="w-full px-4 py-2.5 border border-[#e8e8e8] text-[14px] outline-none focus:border-violet-300 transition-colors">
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button type="submit" class="px-4 py-2.5 bg-indigo-500 hover:bg-indigo-600 rounded-[20px] text-white shadow-[0_2px_2px_rgba(0,0,0,0.25)] text-[14px] font-medium transition-colors">
+                    Create
+                </button>
+                <button type="button" onclick="closeTagModal()" class="px-4 py-2.5 text-[#666] bg-gray-100 hover:bg-gray-200 transition-colors text-[14px] rounded-[20px]">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+<script>
+function switchTab(tab) {
+    var editorTab = document.getElementById('tab-content-editor');
+    var importTab = document.getElementById('tab-content-import');
+    var tabEditor = document.getElementById('tab-editor');
+    var tabImport = document.getElementById('tab-import');
+
+    if (tab === 'editor') {
+        editorTab.classList.remove('hidden');
+        importTab.classList.add('hidden');
+        tabEditor.classList.add('border-violet-500', 'text-violet-600');
+        tabEditor.classList.remove('border-transparent', 'text-gray-500');
+        tabImport.classList.remove('border-violet-500', 'text-violet-600');
+        tabImport.classList.add('border-transparent', 'text-gray-500');
+    } else {
+        editorTab.classList.add('hidden');
+        importTab.classList.remove('hidden');
+        tabImport.classList.add('border-violet-500', 'text-violet-600');
+        tabImport.classList.remove('border-transparent', 'text-gray-500');
+        tabEditor.classList.remove('border-violet-500', 'text-violet-600');
+        tabEditor.classList.add('border-transparent', 'text-gray-500');
+    }
+}
+
+(function() {
+    var quill = new Quill('#editor-container', {
+        theme: 'snow',
+        modules: {
+            toolbar: [
+                [{ 'header': [1, 2, 3, false] }],
+                ['bold', 'italic', 'underline', 'strike'],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                [{ 'script': 'sub'}, { 'script': 'super' }],
+                [{ 'indent': '-1'}, { 'indent': '+1' }],
+                [{ 'direction': 'rtl' }],
+                [{ 'color': [] }, { 'background': [] }],
+                [{ 'align': [] }],
+                ['blockquote', 'code-block'],
+                ['link', 'image'],
+                ['clean']
+            ]
+        }
+    });
+
+    var toolbar = quill.getModule('toolbar');
+    toolbar.addHandler('image', function() {
+        var input = document.createElement('input');
+        input.setAttribute('type', 'file');
+        input.setAttribute('accept', 'image/*');
+        input.click();
+        input.onchange = function() {
+            var file = input.files[0];
+            if (file) {
+                var formData = new FormData();
+                formData.append('image', file);
+                fetch('{% url "library_articles:upload_image" %}', {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-CSRFToken': getCSRFToken() }
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.url) {
+                        var range = quill.getSelection(true);
+                        quill.insertEmbed(range.index, 'image', data.url);
+                        quill.setSelection(range.index + 1);
+                    }
+                });
+            }
+        };
+    });
+
+    var form = document.querySelector('form');
+    var hiddenInput = document.querySelector('[name="content"]');
+    quill.on('text-change', function() {
+        hiddenInput.value = quill.root.innerHTML;
+    });
+})();
+
+var itemSlug = '{% if item %}{{ item.slug }}{% endif %}';
+
+function uploadFiles(files) {
+    for (var i = 0; i < files.length; i++) {
+        if (itemSlug) {
+            var formData = new FormData();
+            formData.append('file', files[i]);
+            var url = '/library/articles/' + itemSlug + '/upload-attachment/';
+            fetch(url, { method: 'POST', body: formData, headers: { 'X-CSRFToken': getCSRFToken() } })
+                .then(r => r.json())
+                .then(data => {
+                    var list = document.getElementById('attachment-list');
+                    var div = document.createElement('div');
+                    div.className = 'flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400';
+                    div.innerHTML = '<i data-lucide="paperclip" class="w-4 h-4"></i><span>' + data.name + '</span>';
+                    list.appendChild(div);
+                    lucide.createIcons();
+                });
+        } else {
+            var dataTransfer = new DataTransfer();
+            var hiddenInput = document.getElementById('additional-files');
+            for (var j = 0; j < hiddenInput.files.length; j++) {
+                dataTransfer.items.add(hiddenInput.files[j]);
+            }
+            dataTransfer.items.add(files[i]);
+            hiddenInput.files = dataTransfer.files;
+            var list = document.getElementById('attachment-list');
+            var div = document.createElement('div');
+            div.className = 'flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400';
+            div.innerHTML = '<i data-lucide="paperclip" class="w-4 h-4"></i><span>' + files[i].name + '</span>';
+            list.appendChild(div);
+            lucide.createIcons();
+        }
+    }
+    document.getElementById('file-input').value = '';
+}
+
+function getCSRFToken() {
+    var cookies = document.cookie.split(';');
+    for (var i = 0; i < cookies.length; i++) {
+        var c = cookies[i].trim();
+        if (c.startsWith('csrftoken=')) return c.substring(10);
+    }
+    return '';
+}
+
+function deleteAttachment(attId, name) {
+    if (!confirm('Delete "' + name + '"?')) return;
+    var slug = '{{ item.slug|default:"" }}';
+    if (!slug) return;
+    fetch('/library/articles/' + slug + '/delete-attachment/' + attId + '/', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCSRFToken() }
+    })
+    .then(function(r) {
+        if (r.ok) {
+            var el = document.getElementById('att-' + attId);
+            if (el) el.remove();
+        }
+    });
+}
+
+function openCategoryModal() {
+    var modal = document.getElementById('category-modal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+function closeCategoryModal() {
+    var modal = document.getElementById('category-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
+document.getElementById('category-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeCategoryModal();
+});
+
+document.getElementById('quick-category-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var form = e.target;
+    var formData = new FormData(form);
+
+    fetch('{% url "library_articles:category_create_api" %}', {
+        method: 'POST',
+        body: JSON.stringify({
+            name: formData.get('name'),
+            color: formData.get('color')
+        }),
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken()
+        }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.id) {
+            var select = document.querySelector('[name="category"]');
+            var option = document.createElement('option');
+            option.value = data.id;
+            option.textContent = data.name;
+            option.selected = true;
+            select.appendChild(option);
+            closeCategoryModal();
+            form.reset();
+        }
+    });
+});
+
+function openTagModal() {
+    var modal = document.getElementById('tag-modal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+function closeTagModal() {
+    var modal = document.getElementById('tag-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
+document.getElementById('tag-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeTagModal();
+});
+
+document.getElementById('quick-tag-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var form = e.target;
+    var formData = new FormData(form);
+    var tagName = formData.get('name').trim();
+
+    if (!tagName) return;
+
+    fetch('{% url "library_articles:tag_create_api" %}', {
+        method: 'POST',
+        body: JSON.stringify({ name: tagName }),
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken()
+        }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.id) {
+            var tagsInput = document.querySelector('[name="tags_input"]');
+            var current = tagsInput.value.trim();
+            if (current) {
+                var tags = current.split(',').map(t => t.trim()).filter(t => t);
+                if (tags.indexOf(tagName) === -1) {
+                    tags.push(tagName);
+                }
+                tagsInput.value = tags.join(', ');
+            } else {
+                tagsInput.value = tagName;
+            }
+            closeTagModal();
+            form.reset();
+        }
+    });
+});
+</script>
+{% endblock %}

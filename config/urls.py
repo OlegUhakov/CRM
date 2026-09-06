@@ -19,6 +19,9 @@ urlpatterns = [
     path('parts/', include('parts.urls')),
     path('assistant/', include('assistant.urls')),
     path('calendar/', include('calendar_app.urls')),
+    path('library/articles/', include('library_articles.urls')),
+    path('library/gallery/', include('library_gallery.urls')),
+    path('library/files/', include('library_files.urls')),
     path('library/', include('library.urls')),
 ]
 
