@@ -61,7 +61,7 @@
 
             <div class="flex items-center gap-2">
                 <label class="text-xs text-gray-500 dark:text-gray-400">Category:</label>
-                <select name="category" onchange="submitFilters()" class="px-3 py-1.5 text-sm border border-[#e8e8e8] dark:border-gray-600 dark:bg-gray-800 dark:text-white outline-none focus:border-violet-300 transition-colors">
+                <select name="category" onchange="submitFilters()" class="px-3 py-2 text-sm border border-[#e8e8e8] dark:border-gray-600 dark:bg-gray-800 dark:text-white outline-none focus:border-violet-300 transition-colors">
                     <option value="">All</option>
                     {% for cat in categories %}
                     <option value="{{ cat.slug }}" {% if current_category == cat.slug %}selected{% endif %}>{{ cat.name }}</option>
@@ -71,7 +71,7 @@
 
             <div class="flex items-center gap-2">
                 <label class="text-xs text-gray-500 dark:text-gray-400">Type:</label>
-                <select name="type" onchange="submitFilters()" class="px-3 py-1.5 text-sm border border-[#e8e8e8] dark:border-gray-600 dark:bg-gray-800 dark:text-white outline-none focus:border-violet-300 transition-colors">
+                <select name="type" onchange="submitFilters()" class="px-3 py-2 text-sm border border-[#e8e8e8] dark:border-gray-600 dark:bg-gray-800 dark:text-white outline-none focus:border-violet-300 transition-colors">
                     <option value="">All</option>
                     {% for key, label in file_types %}
                     <option value="{{ key }}" {% if current_type == key %}selected{% endif %}>{{ label }}</option>
@@ -81,7 +81,7 @@
 
             <div class="flex items-center gap-2">
                 <label class="text-xs text-gray-500 dark:text-gray-400">Date:</label>
-                <select name="date" onchange="submitFilters()" class="px-3 py-1.5 text-sm border border-[#e8e8e8] dark:border-gray-600 dark:bg-gray-800 dark:text-white outline-none focus:border-violet-300 transition-colors">
+                <select name="date" onchange="submitFilters()" class="px-3 py-2 text-sm border border-[#e8e8e8] dark:border-gray-600 dark:bg-gray-800 dark:text-white outline-none focus:border-violet-300 transition-colors">
                     <option value="">All Time</option>
                     <option value="today" {% if current_date == 'today' %}selected{% endif %}>Today</option>
                     <option value="week" {% if current_date == 'week' %}selected{% endif %}>This Week</option>
