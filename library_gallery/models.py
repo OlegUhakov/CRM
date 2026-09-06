@@ -8,6 +8,7 @@ class PhotoManager(models.Manager):
         return (
             super().get_queryset()
             .filter(is_active=True)
+            .filter(Q(content__isnull=True) | Q(content=''))
             .filter(
                 Q(file_type='image')
                 | Q(attachments__file__icontains='.jpg')

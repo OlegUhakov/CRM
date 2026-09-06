@@ -21,6 +21,7 @@ def _gallery_queryset():
     )
     return (
         LibraryItem.objects.filter(is_active=True)
+        .filter(Q(content__isnull=True) | Q(content=''))
         .filter(image_filter)
         .select_related('category')
         .distinct()
