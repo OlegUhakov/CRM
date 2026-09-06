@@ -13,6 +13,7 @@ from django.utils import timezone
 from core.models import log_activity
 from library.forms import CategoryForm, LibraryItemForm
 from library.models import Category, LibraryAttachment, LibraryItem, Tag
+from library.storage import IMAGE_EXTENSIONS, LibraryStorage
 from library.utils import get_article_folder_path
 
 ALLOWED_HTML_TAGS = [
@@ -126,11 +127,37 @@ def article_detail(request, slug):
     return render(request, 'library_articles/detail.html', {'item': item})
 
 
+def _prepare_picture_field(form):
+    field = form.fields.get('file')
+    if field is not None:
+        field.widget.attrs['accept'] = 'image/*'
+
+
+def _validate_picture(request, form):
+    uploaded = request.FILES.get('file')
+    if uploaded:
+        ext = uploaded.name.rsplit('.', 1)[-1].lower() if '.' in uploaded.name else ''
+        if ext not in IMAGE_EXTENSIONS:
+            form.add_error('file', 'Please upload an image (JPG, PNG, GIF, WebP).')
+            return False
+    return True
+
+
+def _delete_storage_file(name):
+    if not name:
+        return
+    try:
+        LibraryStorage().delete(name)
+    except Exception:
+        pass
+
+
 @login_required
 def article_create(request):
     if request.method == 'POST':
         form = LibraryItemForm(request.POST, request.FILES)
-        if form.is_valid():
+        _prepare_picture_field(form)
+        if form.is_valid() and _validate_picture(request, form):
             item = form.save(commit=False)
             item.content = _clean_html(item.content)
             item.created_by = request.user
@@ -145,6 +172,7 @@ def article_create(request):
             return redirect('library_articles:detail', slug=item.slug)
     else:
         form = LibraryItemForm()
+        _prepare_picture_field(form)
     return render(request, 'library_articles/form.html', {
         'form': form,
         'title': 'New Article',
@@ -156,13 +184,21 @@ def article_create(request):
 @login_required
 def article_edit(request, slug):
     item = get_object_or_404(LibraryItem, slug=slug, is_active=True)
+    old_file_name = item.file.name if item.file else None
     if request.method == 'POST':
         form = LibraryItemForm(request.POST, request.FILES, instance=item)
-        if form.is_valid():
+        _prepare_picture_field(form)
+        if form.is_valid() and _validate_picture(request, form):
             item = form.save(commit=False)
             item.content = _clean_html(item.content)
+            if request.POST.get('remove_picture') and 'file' not in request.FILES:
+                if item.file:
+                    item.file.delete(save=False)
+                    item.file = None
             item.save()
             form._save_tags(item)
+            if old_file_name and item.file and item.file.name != old_file_name:
+                _delete_storage_file(old_file_name)
             if item.content or item.file:
                 item.save_as_md(item.content or '')
             log_activity(request.user, 'updated', f'Article "{item.title}"', item)
@@ -170,6 +206,7 @@ def article_edit(request, slug):
             return redirect('library_articles:detail', slug=item.slug)
     else:
         form = LibraryItemForm(instance=item)
+        _prepare_picture_field(form)
     return render(request, 'library_articles/form.html', {
         'form': form,
         'title': 'Edit Article',

@@ -45,12 +45,28 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Main File</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Picture</label>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Cover image for the article card (JPG, PNG, GIF, WebP).</p>
+                    {% if item and item.file %}
+                    <div class="flex items-center gap-3 mb-2 p-2 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700">
+                        {% if item.file_type == 'image' %}
+                        <a href="{{ item.file.url }}" target="_blank" class="flex-shrink-0">
+                            <img src="{{ item.file.url }}" alt="{{ item.title }}" class="w-16 h-16 object-cover rounded">
+                        </a>
+                        {% else %}
+                        <i data-lucide="file" class="w-8 h-8 text-gray-400 flex-shrink-0"></i>
+                        {% endif %}
+                        <div class="min-w-0 flex-1">
+                            <a href="{{ item.file.url }}" target="_blank" class="text-sm text-violet-600 dark:text-violet-400 hover:underline truncate block" title="{{ item.file.name }}">{{ item.file.name }}</a>
+                            <label class="flex items-center gap-1.5 mt-1 text-xs text-gray-500 dark:text-gray-400 cursor-pointer">
+                                <input type="checkbox" name="remove_picture" value="1" class="rounded border-gray-300 text-red-600 focus:ring-red-500">
+                                Remove picture
+                            </label>
+                        </div>
+                    </div>
+                    {% endif %}
                     {{ form.file }}
                     {% if form.file.errors %}<p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.file.errors.0 }}</p>{% endif %}
-                    {% if item and item.file %}
-                    <p class="mt-1 text-xs text-gray-500">Current: {{ item.file.name }}</p>
-                    {% endif %}
                 </div>
 
                 <div class="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4">
