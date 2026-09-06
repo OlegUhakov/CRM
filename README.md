@@ -1,6 +1,6 @@
 ![CRM](CRM.png)
 
-> **Django 6.1 + Tailwind CSS 4 + Alpine.js + HTMX + AI Assistant**
+> **Django 6.x + Tailwind CSS 4 + Alpine.js + HTMX + AI Assistant**
 
 A lightweight CRM/ERP platform designed for engineering and manufacturing teams.
 It brings projects, tasks, materials, technical drawings, documents, and internal knowledge together in one unified workspace. Ideal for small manufacturing shops, CNC workshops, engineering bureaus, and teams that need structure without heavy corporate systems.
@@ -15,7 +15,7 @@ Support for engineering files (DXF, STEP, STL)
 
 Centralized document storage
 
-Built‑in knowledge library
+Knowledge base split into Articles, Gallery, and Files
 
 AI assistant for automation and team support
 
@@ -51,6 +51,8 @@ Beyond individual projects, the CRM also serves as a knowledge base for general 
 
 Articles can be saved directly from the internet via a link, making it easy to build a personal reference library without manual copy-pasting. As with projects, all saved materials are automatically organized into clearly structured folders.
 
+The library is split into three independent sections — **Articles**, **Gallery**, and **Files** — each with its own page, filters, and upload flow (no shared tabs).
+
 ### Key Benefits
 
 - **One place for everything** — no more hunting across folders, drives, and inboxes
@@ -58,7 +60,7 @@ Articles can be saved directly from the internet via a link, making it easy to b
 - **Clean lifecycle management** — active projects stay easy to find; finished projects can be archived without losing structure
 - **Built-in knowledge base** — a growing library of reference material, saved and organized alongside project work
 
-A project management, contractor and task tracking system featuring 14 custom apps, an AI assistant with a command mode, and a modular HTMX-driven UI.
+A project management, contractor and task tracking system featuring 17 custom apps, an AI assistant with a command mode, and a modular HTMX-driven UI.
 
 ---
 
@@ -87,7 +89,7 @@ Run `update.bat` after pulling new code to refresh dependencies and rebuild the 
 
 | Layer | Technology |
 |-------|-----------|
-| Backend | Django 6.1, Python 3.14+, SQLite |
+| Backend | Django 6.x, Python 3.14+, SQLite |
 | Frontend | Tailwind CSS 4 (CLI + CDN), Alpine.js 3.x, HTMX 2.0.4, Lucide Icons, Montserrat |
 | AI | Ollama, Anthropic, OpenAI, Google, Mistral, Groq, DeepSeek, OpenRouter, OpenCode |
 | Build | Tailwind CLI v4 (`npm run dev` / `npm run build`) |
@@ -122,7 +124,10 @@ Run `update.bat` after pulling new code to refresh dependencies and rebuild the 
 ### Knowledge & AI
 | Module | Description |
 |--------|-------------|
-| **Library** | Knowledge base with rich-text editor (Quill.js), articles auto-saved as `.md` files on disk with images, nested categories, tags, favorites, file attachments |
+| **Articles** (`library_articles`) | Rich-text editor (Quill.js, resizable), URL import, cover Picture shown on cards, articles auto-saved as `.md` files on disk, nested categories, tags, favorites, file attachments |
+| **Gallery** (`library_gallery`) | Photo grid with list/grid toggle, date filter, drag-and-drop upload, lightbox |
+| **Files** (`library_files`) | File catalog with list/grid toggle, type/date filters, sorting, drag-and-drop upload |
+| **Library** (`library`, shared core) | Shared `LibraryItem` / `Category` / `Tag` models, custom `LibraryStorage`, legacy routes |
 | **AI Assistant** | Multi-provider AI chat with CHAT/COMMANDS modes, browser agent, web search, file management |
 
 ### Tooling
@@ -182,16 +187,21 @@ CRM/
   tasks/             Task management
   notes/             Universal notes
   documents/         File upload/preview
-  library/           Knowledge base (articles saved as .md on disk, categories, tags, files)
+  library/           Shared knowledge-base core (LibraryItem, Category, Tag, LibraryStorage)
+  library_articles/  Articles section (list/detail/create/edit, categories, import)
+  library_gallery/   Gallery section (photo grid, upload)
+  library_files/     Files section (file catalog, upload)
   parts/             Drawings & 3D models
   assistant/         AI chat, LLM, browser agent, command handlers
   calendar_app/      Calendar view
   generator/         Module scaffolding
   templates/         Base layout, includes (sidebar, topbar, chat, pagination)
   static/            Tailwind CSS source (src/) and dist/
-  media/             User-uploaded files
+  media/             User-uploaded files (default library root: media/library/)
   ai_files/          AI-downloaded files
 ```
+
+The `Article`, `Photo`, and `FileDocument` models are proxies over `library.LibraryItem` — no extra tables, no data duplication. `Category` / `Tag` stay shared in `library`.
 
 ---
 
@@ -210,7 +220,10 @@ CRM/
 | `/materials/` | materials | BOM management |
 | `/deals/` | generator | Deal CRUD (example scaffold) |
 | `/documents/` | documents | File management |
-| `/library/` | library | Knowledge base |
+| `/library/articles/` | library_articles | Articles (list, detail, create/edit, categories, import) |
+| `/library/gallery/` | library_gallery | Photo gallery + upload |
+| `/library/files/` | library_files | File catalog + upload |
+| `/library/` | library | Shared core + legacy routes |
 | `/parts/` | parts | Engineering drawings |
 | `/assistant/` | assistant | AI chat |
 | `/calendar/` | calendar_app | Calendar view |
@@ -231,7 +244,11 @@ All business models extend `TimeStampedModel` (`created_at`, `updated_at`, `crea
 | **Task** | title, slug, description, status, priority, due_date | FK→Project |
 | **Note** | title, slug, content, date | FK→Project / Company / Contact |
 | **Document** | number, size, file, file_type | FK→Project, Category |
-| **LibraryItem** | title, slug, content (HTML), is_favorite, source_url, summary | FK→Category; M2M→Tag; auto-saved as `{slug}_{date}.md` on disk |
+| **LibraryItem** | title, slug, content (HTML), file, file_type, preview_image, is_favorite, source_url, summary | FK→Category; M2M→Tag; auto-saved as `{slug}_{date}.md` on disk |
+| **Article** (proxy) | articles only (non-empty content) | Proxy over LibraryItem |
+| **Photo** (proxy) | file-only images (no article content) | Proxy over LibraryItem |
+| **FileDocument** (proxy) | file-only documents (no article content) | Proxy over LibraryItem |
+| **LibraryAttachment** | file, name, uploaded_at | FK→LibraryItem |
 | **Part** | number, size, rev, file | FK→Project, Category |
 | **Deal** (example) | name, slug, status, priority, value, due_date | FK→Company; M2M→Contact; FK→User |
 | **Category** | name, slug, color, icon, parent (self-referential) | Materials, Documents, Parts, Library |
@@ -253,7 +270,7 @@ All business models extend `TimeStampedModel` (`created_at`, `updated_at`, `crea
 - **Activity logging** — all CRUD tracked via GenericForeignKey
 - **Project export/import** — ZIP archives with JSON manifest
 - **Dark mode** — localStorage-persisted, user-toggleable
-- **Collapsible sidebar** — expandable/collapsible navigation
+- **Collapsible sidebar** — expandable/collapsible navigation without reload flicker
 - **Settings panel** — configurable storage paths, naming, AI providers
 - **AI undo** — 10-second undo window for write operations
 - **Versioning** — `0.7.{git_commit_count}` via `core/version.py`
@@ -295,22 +312,26 @@ Projects store files in organized directories:
 
 Subfolder naming is configurable via `AppSetting`. Storage backend uses custom `ProjectFileSystemStorage`.
 
-### Library Articles
+### Library
 
-Articles are auto-saved as Markdown (`.md`) files on disk for portability:
+Everything library-related lives in one root folder (configurable via `AppSetting` `storage.project_path`, falls back to `MEDIA_ROOT/library/`), next to the article folders:
 
 ```
 {library_root}/
+  files/                     # Uploaded documents (PDF, DOCX, TXT, ...)
+  images/                    # Gallery uploads, article covers, preview images
   {slug}_{YYYY-MM-DD}/
-    {slug}_{YYYY-MM-DD}.md    # Full article content in Markdown
-    images/                    # Downloaded/copied article images
-    attachments/               # Uploaded file attachments
+    {slug}_{YYYY-MM-DD}.md   # Full article content in Markdown
+    images/                  # Downloaded/copied article images
+    attachments/             # Uploaded file attachments
 ```
 
 - Content is stored both in the database (HTML) and as `.md` on disk
-- Storage root is configurable via `AppSetting` (falls back to `MEDIA_ROOT/library/`)
+- Upload routing (`files/` vs `images/`) is extension-based; uploads use the custom `LibraryStorage` backend
+- Uploads are served via the login-protected `/library/uploads/...` view with path traversal protection (not via `/media/`)
 - Article folders are created on create/edit/import and recursively deleted on delete
-- Images are served via a dedicated `/library/{slug}/image/{path}` view with path traversal protection
+- Article content images are served via a dedicated `/library/{slug}/image/{path}` view with path traversal protection
+- Article **Picture** (cover) is set on the edit page, shown first on article cards (imported preview image is the fallback), and never appears in the Gallery
 
 ## License
 
