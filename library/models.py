@@ -2,6 +2,7 @@ import os
 from django.db import models
 from slugify import slugify
 from core.models import TimeStampedModel, generate_unique_slug
+from .storage import LibraryStorage, library_file_upload_to, library_preview_upload_to
 
 
 class Category(TimeStampedModel):
@@ -60,9 +61,9 @@ class LibraryItem(TimeStampedModel):
     source_url = models.URLField(blank=True, null=True, help_text='Original URL if imported')
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name='items')
     tags = models.ManyToManyField(Tag, blank=True, related_name='items')
-    file = models.FileField(upload_to='library/files/', blank=True, null=True)
+    file = models.FileField(upload_to=library_file_upload_to, storage=LibraryStorage(), blank=True, null=True)
     file_type = models.CharField(max_length=10, choices=FILE_TYPE_CHOICES, blank=True, null=True)
-    preview_image = models.ImageField(upload_to='library/previews/', blank=True, null=True)
+    preview_image = models.ImageField(upload_to=library_preview_upload_to, storage=LibraryStorage(), blank=True, null=True)
     is_favorite = models.BooleanField(default=False)
 
     class Meta:
@@ -102,14 +103,14 @@ class LibraryItem(TimeStampedModel):
 
 
 def attachment_upload_to(instance, filename):
-    from .utils import get_article_folder_path
-    folder = get_article_folder_path(instance.item)
-    return os.path.join(folder, 'attachments', filename)
+    from .utils import get_article_folder_name
+    folder = get_article_folder_name(instance.item)
+    return '{}/attachments/{}'.format(folder, os.path.basename(filename))
 
 
 class LibraryAttachment(models.Model):
     item = models.ForeignKey(LibraryItem, on_delete=models.CASCADE, related_name='attachments')
-    file = models.FileField(upload_to=attachment_upload_to)
+    file = models.FileField(upload_to=attachment_upload_to, storage=LibraryStorage())
     name = models.CharField(max_length=500, blank=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
 

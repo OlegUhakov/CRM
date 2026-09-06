@@ -12,7 +12,7 @@ from django.utils import timezone
 from django.template.loader import render_to_string
 from .models import LibraryItem, Category, Tag, LibraryAttachment
 from .forms import LibraryItemForm, CategoryForm
-from .utils import get_article_folder_path
+from .utils import get_article_folder_path, get_library_root
 from core.models import log_activity
 
 
@@ -27,6 +27,25 @@ def library_serve_image(request, slug, image_path):
     if not os.path.exists(full_path):
         raise Http404("File not found")
     return FileResponse(open(full_path, 'rb'), filename=os.path.basename(full_path))
+
+
+@login_required
+def library_serve_upload(request, path):
+    """Serve files from the library root (files/, images/, article folders)."""
+    import mimetypes
+
+    root = os.path.normpath(get_library_root())
+    full_path = os.path.normpath(os.path.join(root, path))
+    if not full_path.startswith(root + os.sep) and full_path != root:
+        raise Http404("Invalid path")
+    if not os.path.isfile(full_path):
+        raise Http404("File not found")
+    content_type, _ = mimetypes.guess_type(full_path)
+    return FileResponse(
+        open(full_path, 'rb'),
+        filename=os.path.basename(full_path),
+        content_type=content_type or 'application/octet-stream',
+    )
 
 
 @login_required
